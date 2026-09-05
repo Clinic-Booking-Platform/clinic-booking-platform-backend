@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// 1. USERS & DOCTORS
+// ============================================================
+model User {
+  id            Int       @id @default(autoincrement())
+  full_name     String    @db.VarChar(255)
+  phone_number  String?   @db.VarChar(20)
+  email         String    @unique @db.VarChar(255)
+  password      String    @db.VarChar(255)
+  date_of_birth DateTime? @db.Date
+  gender        String?   @db.VarChar(10)
+  role          String    @default("USER") @db.VarChar(50)
+  avatar        String?   @db.VarChar(255)
+  deleted_at    DateTime?
+
+  // Relations
+  doctor       Doctor?
+  appointments Appointment[]
+  cart         Cart?
+  orders       Order[]
+
+  @@map("users")
+}
+
+model Doctor {
+  id           Int       @id @default(autoincrement())
+  user_id      Int       @unique
+  specialty_id Int
+  description  String?   @db.Text
+  price        Decimal   @db.Decimal(12, 2)
+  deleted_at   DateTime?
+
+  // Relations
+  user         User          @relation(fields: [user_id], references: [id])
+  specialty    Specialty     @relation(fields: [specialty_id], references: [id])
+  schedules    Schedule[]
+  appointments Appointment[]
+  articles     Article[]
+
+  @@map("doctors")
+}
+
+// ============================================================
+// 2. SPECIALTIES
+// ============================================================
+model Specialty {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  description String?   @db.Text
+  image_url   String?   @db.VarChar(255)
+  deleted_at  DateTime?
+
+  // Relations
+  doctors  Doctor[]
+  articles Article[]
+
+  @@map("specialties")
+}
+
+// ============================================================
+// 3. SCHEDULES (Lịch làm việc của bác sĩ)
+// ============================================================
+model Schedule {
+  id         Int      @id @default(autoincrement())
+  doctor_id  Int
+  date       DateTime @db.Date
+  time_type  String   @db.VarChar(50)
+  max_number Int      @default(10)
+  status     String   @default("AVAILABLE") @db.VarChar(50)
+
+  // Relations
+  doctor Doctor @relation(fields: [doctor_id], references: [id])
+
+  @@map("schedules")
+}
+
+// ============================================================
+// 4. PACKAGES & PACKAGE DETAILS (Gói khám)
+// ============================================================
+model Package {
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(255)
+  description    String?   @db.Text
+  thumbnail_url  String?   @db.VarChar(255)
+  price          Decimal   @db.Decimal(12, 2)
+  discount_price Decimal?  @db.Decimal(12, 2)
+  deleted_at     DateTime?
+
+  // Relations
+  package_detail PackageDetail?
+  appointments   Appointment[]
+  cart_details   CartDetail[]
+  order_details  OrderDetail[]
+
+  @@map("packages")
+}
+
+model PackageDetail {
+  id           Int    @id @default(autoincrement())
+  package_id   Int    @unique
+  html_content String @db.LongText
+
+  // Relations
+  package Package @relation(fields: [package_id], references: [id])
+
+  @@map("package_details")
+}
+
+// ============================================================
+// 5. APPOINTMENTS (Lịch hẹn khám: Offline & Online)
+// ============================================================
+model Appointment {
+  id               Int       @id @default(autoincrement())
+  user_id          Int
+  doctor_id        Int?
+  package_id       Int?
+  order_id         Int?      @unique // null nếu đặt Offline, có giá trị nếu đặt/thanh toán Online
+  appointment_type String    @db.VarChar(50) // e.g. "OFFLINE" | "ONLINE"
+  meeting_link     String?   @db.VarChar(255)
+  date             DateTime  @db.Date
+  time_type        String    @db.VarChar(50)
+  patient_name     String    @db.VarChar(255)
+  patient_phone    String    @db.VarChar(20)
+  symptoms         String?   @db.Text
+  status           String    @default("PENDING") @db.VarChar(50)
+  deleted_at       DateTime?
+
+  // Relations
+  user    User     @relation(fields: [user_id], references: [id])
+  doctor  Doctor?  @relation(fields: [doctor_id], references: [id])
+  package Package? @relation(fields: [package_id], references: [id])
+  order   Order?   @relation(fields: [order_id], references: [id])
+
+  @@map("appointments")
+}
+
+// ============================================================
+// 6. ARTICLES & ARTICLE DETAILS (Bài viết)
+// ============================================================
+model Article {
+  id                Int       @id @default(autoincrement())
+  author_id         Int
+  specialty_id      Int?
+  title             String    @db.VarChar(255)
+  slug              String    @unique @db.VarChar(255)
+  thumbnail_url     String?   @db.VarChar(255)
+  short_description String?   @db.Text
+  views             Int       @default(0)
+  created_at        DateTime  @default(now())
+  deleted_at        DateTime?
+
+  // Relations
+  author         Doctor         @relation(fields: [author_id], references: [id])
+  specialty      Specialty?     @relation(fields: [specialty_id], references: [id])
+  article_detail ArticleDetail?
+
+  @@map("articles")
+}
+
+model ArticleDetail {
+  id           Int    @id @default(autoincrement())
+  article_id   Int    @unique
+  html_content String @db.LongText
+
+  // Relations
+  article Article @relation(fields: [article_id], references: [id])
+
+  @@map("article_details")
+}
+
+// ============================================================
+// 7. CART & CART DETAILS (Giỏ hàng)
+// ============================================================
+model Cart {
+  id      Int     @id @default(autoincrement())
+  user_id Int     @unique
+  status  String? @default("ACTIVE") @db.VarChar(50)
+
+  // Relations
+  user         User         @relation(fields: [user_id], references: [id])
+  cart_details CartDetail[]
+
+  @@map("carts")
+}
+
+model CartDetail {
+  id         Int     @id @default(autoincrement())
+  cart_id    Int
+  package_id Int
+  quantity   Int     @default(1)
+  price      Decimal @db.Decimal(12, 2)
+
+  // Relations
+  cart    Cart    @relation(fields: [cart_id], references: [id])
+  package Package @relation(fields: [package_id], references: [id])
+
+  @@map("cart_details")
+}
+
+// ============================================================
+// 8. ORDERS & ORDER DETAILS (Đơn hàng)
+// ============================================================
+model Order {
+  id             Int       @id @default(autoincrement())
+  user_id        Int
+  order_code     String    @unique @db.VarChar(50)
+  total_price    Decimal   @db.Decimal(12, 2)
+  payment_method String    @db.VarChar(50)
+  payment_status String    @default("UNPAID") @db.VarChar(50)
+  created_at     DateTime  @default(now())
+  deleted_at     DateTime?
+
+  // Relations
+  user          User          @relation(fields: [user_id], references: [id])
+  order_details OrderDetail[]
+  appointment   Appointment?
+
+  @@map("orders")
+}
+
+model OrderDetail {
+  id         Int     @id @default(autoincrement())
+  order_id   Int
+  package_id Int
+  quantity   Int     @default(1)
+  price      Decimal @db.Decimal(12, 2)
+
+  // Relations
+  order   Order   @relation(fields: [order_id], references: [id])
+  package Package @relation(fields: [package_id], references: [id])
+
+  @@map("order_details")
+}
+
+// ============================================================
+// 9. BANNERS
+// ============================================================
+model Banner {
+  id         Int     @id @default(autoincrement())
+  title      String  @db.VarChar(255)
+  image_url  String  @db.VarChar(255)
+  link_url   String? @db.VarChar(255)
+  sort_order Int     @default(0)
+  is_active  Boolean @default(true)
+
+  @@map("banners")
+}
