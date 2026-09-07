@@ -1,29 +1,32 @@
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import { v4 } from 'uuid';
-import { Request, Response, NextFunction } from 'express';
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.uploadMultipleMiddleware = exports.uploadSingleMiddleware = void 0;
+const multer_1 = __importDefault(require("multer"));
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+const uuid_1 = require("uuid");
 // Cấu hình chung cho Multer
-const createMulter = (dir: string = 'images') => {
-    const uploadDir = path.join(process.cwd(), 'src/public', dir);
-    if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+const createMulter = (dir = 'images') => {
+    const uploadDir = path_1.default.join(process.cwd(), 'src/public', dir);
+    if (!fs_1.default.existsSync(uploadDir)) {
+        fs_1.default.mkdirSync(uploadDir, { recursive: true });
     }
-
-    return multer({
-        storage: multer.diskStorage({
+    return (0, multer_1.default)({
+        storage: multer_1.default.diskStorage({
             destination: (req, file, cb) => {
                 cb(null, uploadDir);
             },
             filename: (req, file, cb) => {
-                cb(null, v4() + path.extname(file.originalname));
+                cb(null, (0, uuid_1.v4)() + path_1.default.extname(file.originalname));
             },
         }),
         limits: {
             fileSize: 1024 * 1024 * 5, // Tối đa 5MB
         },
-        fileFilter: (req: Express.Request, file: Express.Multer.File, cb: Function) => {
+        fileFilter: (req, file, cb) => {
             const allowedExts = /\.(jpe?g|png|webp|jfif)$/i;
             const allowedMimes = [
                 'image/png',
@@ -34,28 +37,25 @@ const createMulter = (dir: string = 'images') => {
                 'image/jfif',
                 'application/octet-stream', // Postman hoặc một số client gửi mimetype này
             ];
-
-            const extname = path.extname(file.originalname).toLowerCase();
+            const extname = path_1.default.extname(file.originalname).toLowerCase();
             const isExtValid = allowedExts.test(extname);
             const isMimeValid = allowedMimes.includes((file.mimetype || '').toLowerCase());
-
             // Chấp nhận nếu phần mở rộng là ảnh hợp lệ (jpg/png/webp) HOẶC mimetype hợp lệ
             if (isExtValid || isMimeValid) {
                 cb(null, true);
-            } else {
+            }
+            else {
                 cb(new Error(`Chỉ chấp nhận các định dạng ảnh JPEG, JPG, PNG và WEBP. File nhận được: "${file.originalname}" (mimetype: ${file.mimetype})`), false);
             }
         },
     });
 };
-
 // 1. Middleware Upload 1 file ảnh (Avatar, Thumbnail...)
-export const uploadSingleMiddleware = (fieldName: string = 'file', dir: string = 'images') => {
+const uploadSingleMiddleware = (fieldName = 'file', dir = 'images') => {
     const upload = createMulter(dir).single(fieldName);
-
-    return (req: Request, res: Response, next: NextFunction) => {
-        upload(req, res, (err: any) => {
-            if (err instanceof multer.MulterError) {
+    return (req, res, next) => {
+        upload(req, res, (err) => {
+            if (err instanceof multer_1.default.MulterError) {
                 if (err.code === 'LIMIT_FILE_SIZE') {
                     return res.status(400).json({
                         status: 'error',
@@ -72,7 +72,8 @@ export const uploadSingleMiddleware = (fieldName: string = 'file', dir: string =
                     status: 'error',
                     message: `Lỗi upload: ${err.message}`,
                 });
-            } else if (err) {
+            }
+            else if (err) {
                 return res.status(400).json({
                     status: 'error',
                     message: err.message || 'Lỗi khi tải file lên',
@@ -82,14 +83,13 @@ export const uploadSingleMiddleware = (fieldName: string = 'file', dir: string =
         });
     };
 };
-
+exports.uploadSingleMiddleware = uploadSingleMiddleware;
 // 2. Middleware Upload nhiều file ảnh (Gallery, Album chi tiết...)
-export const uploadMultipleMiddleware = (fieldName: string = 'files', maxCount: number = 10, dir: string = 'images') => {
+const uploadMultipleMiddleware = (fieldName = 'files', maxCount = 10, dir = 'images') => {
     const upload = createMulter(dir).array(fieldName, maxCount);
-
-    return (req: Request, res: Response, next: NextFunction) => {
-        upload(req, res, (err: any) => {
-            if (err instanceof multer.MulterError) {
+    return (req, res, next) => {
+        upload(req, res, (err) => {
+            if (err instanceof multer_1.default.MulterError) {
                 if (err.code === 'LIMIT_FILE_SIZE') {
                     return res.status(400).json({
                         status: 'error',
@@ -106,7 +106,8 @@ export const uploadMultipleMiddleware = (fieldName: string = 'files', maxCount: 
                     status: 'error',
                     message: `Lỗi upload: ${err.message}`,
                 });
-            } else if (err) {
+            }
+            else if (err) {
                 return res.status(400).json({
                     status: 'error',
                     message: err.message || 'Lỗi khi tải danh sách file lên',
@@ -116,5 +117,5 @@ export const uploadMultipleMiddleware = (fieldName: string = 'files', maxCount: 
         });
     };
 };
-
-export default uploadSingleMiddleware;
+exports.uploadMultipleMiddleware = uploadMultipleMiddleware;
+exports.default = exports.uploadSingleMiddleware;

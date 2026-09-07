@@ -6,7 +6,8 @@ import rateLimit from 'express-rate-limit';
 dotenv.config();
 
 import cors from 'cors';
-import { authRouter } from './routes/api.js';
+import { adminRouter, authRouter, doctorRouter, userRouter } from './routes/api.js';
+import { initialData } from './seed/Seed.js';
 
 const app: Application = express();
 const port = process.env.PORT || 8080;
@@ -36,8 +37,12 @@ const limiter = rateLimit({
     legacyHeaders: false, // Tắt header cũ `X-RateLimit-*`
 });
 
+initialData();
 app.use(limiter);
 app.use('/', authRouter);
+app.use('/admin', adminRouter);
+app.use('/', userRouter);
+app.use('/doctor', doctorRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

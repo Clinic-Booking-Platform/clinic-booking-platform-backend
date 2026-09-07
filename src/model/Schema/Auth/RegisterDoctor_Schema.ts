@@ -6,7 +6,7 @@ const emailSchema = z.string().email('Email không đúng định dạng').refin
     { message: 'Email đã tồn tại' }
 );
 
-export const RegisterUserSchema = z
+export const RegisterDoctorSchema = z
     .object({
         fullname: z
             .string({ message: 'Họ và tên không hợp lệ hoặc bị trống' })
@@ -14,6 +14,8 @@ export const RegisterUserSchema = z
             .min(1, 'Họ và tên không được để trống')
             .max(100, 'Họ và tên không được vượt quá 100 ký tự'),
         email: emailSchema,
+        specialty_id: z.number({ message: 'Chuyên khoa không hợp lệ hoặc bị trống' }).min(1, 'Chuyên khoa không được để trống'),
+        price: z.number({ message: 'Giá khám không hợp lệ hoặc bị trống' }).min(0, 'Giá khám không được để trống'),
         password: z
             .string({ message: 'Mật khẩu không hợp lệ hoặc bị trống' })
             .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
@@ -29,4 +31,4 @@ export const RegisterUserSchema = z
         path: ['confirmpassword'],
     });
 
-export type RegisterUser = z.infer<typeof RegisterUserSchema>;
+export type RegisterDoctor = z.infer<typeof RegisterDoctorSchema>;

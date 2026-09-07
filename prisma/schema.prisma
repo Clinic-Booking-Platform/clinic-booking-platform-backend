@@ -18,17 +18,29 @@ model User {
   password      String    @db.VarChar(255)
   date_of_birth DateTime? @db.Date
   gender        String?   @db.VarChar(10)
-  role          String    @default("USER") @db.VarChar(50)
-  avatar        String?   @db.VarChar(255)
-  deleted_at    DateTime?
+
+  avatar     String?   @db.VarChar(255)
+  deleted_at DateTime?
 
   // Relations
+  role         Role?         @relation(fields: [roleId], references: [id])
+  roleId       Int?          @map("role_id") @db.UnsignedInt
   doctor       Doctor?
   appointments Appointment[]
   cart         Cart?
   orders       Order[]
 
   @@map("users")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement()) @db.UnsignedInt
+  name        String  @unique @db.VarChar(50)
+  description String? @db.VarChar(255)
+
+  users User[]
+
+  @@map("roles")
 }
 
 model Doctor {
