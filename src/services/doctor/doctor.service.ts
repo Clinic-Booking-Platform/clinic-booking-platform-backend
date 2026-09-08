@@ -53,7 +53,7 @@ export const getDoctorsService = async (options?: GetDoctorsOptions) => {
     };
 
     const skip = (page - 1) * size;
-    const [total, doctors] = await Promise.all([
+    const [total, doctors] = await prisma.$transaction([
         prisma.doctor.count({ where }),
         prisma.doctor.findMany({
             where,

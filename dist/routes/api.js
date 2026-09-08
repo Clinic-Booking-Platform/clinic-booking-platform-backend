@@ -13,6 +13,7 @@ const upload_api_js_1 = require("../controllers/upload/upload.api.js");
 const auth_services_js_1 = require("../middleware/auth.services.js");
 const user_controller_js_1 = require("../controllers/user/user.controller.js");
 const doctor_api_js_1 = require("../controllers/doctor/doctor.api.js");
+const specialty_api_js_1 = require("../controllers/specialty/specialty.api.js");
 exports.authRouter = express_1.default.Router();
 exports.adminRouter = express_1.default.Router();
 exports.userRouter = express_1.default.Router();
@@ -33,26 +34,32 @@ exports.authRouter.post('/upload/multiple', auth_services_js_1.authMiddlewareCli
 // ============================================================
 // CLIENTS ROUTES (User / Doctor / Admin đã đăng nhập)
 // ============================================================
-// Tài khoản cá nhân
+// me
 exports.userRouter.get('/me', user_controller_js_1.getMeAPI);
 exports.userRouter.put('/me', user_controller_js_1.putMeAPI);
-// Xem danh sách và chi tiết bác sĩ
+// doctor
 exports.userRouter.get('/doctors', doctor_api_js_1.getDoctorsAPI);
 exports.userRouter.get('/doctors/:id', doctor_api_js_1.getDoctorDetailAPI);
+//specialty
+exports.userRouter.get('/specialties', specialty_api_js_1.getSpecialtiesAPI);
+exports.userRouter.get('/specialties/:id', specialty_api_js_1.getSpecialtiesDetailAPI);
 // ============================================================
 // DOCTOR ROUTES (Dành riêng cho Bác sĩ)
 // ============================================================
 // ============================================================
 // ADMIN ROUTES (Dành riêng cho Quản trị viên)
 // ============================================================
-// 1. Quản lý Bác sĩ (Doctor Management)
+// doctor
 exports.adminRouter.post('/doctors', auth_api_js_1.registerDoctorAPI);
 exports.adminRouter.get('/doctors', doctor_api_js_1.getDoctorsAPI);
 exports.adminRouter.get('/doctors/:id', doctor_api_js_1.getDoctorDetailAPI);
 exports.adminRouter.put('/doctors/:id', doctor_api_js_1.updateDoctorAPI);
 exports.adminRouter.delete('/doctors/:id', doctor_api_js_1.deleteDoctorAPI);
 exports.adminRouter.post('/doctors-restore/:id', doctor_api_js_1.restoreDoctorAPI);
-// 2. Quản lý Người dùng (User Management)
+// user
 exports.adminRouter.get('/user', user_controller_js_1.getUsersAPI);
 exports.adminRouter.delete('/user/:id', user_controller_js_1.deleteUserAPI);
 exports.adminRouter.post('/user-restore/:id', user_controller_js_1.restoreUserAPI);
+// specialty
+exports.adminRouter.get('/specialties', specialty_api_js_1.getSpecialtiesAPI);
+exports.adminRouter.get('/specialties/:id', specialty_api_js_1.getSpecialtiesDetailAPI);

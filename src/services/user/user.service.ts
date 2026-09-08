@@ -32,7 +32,7 @@ export const getUsersService = async (options?: GetUsersOptions) => {
     }
 
     const skip = (page - 1) * pageSize;
-    const [total, users] = await Promise.all([
+    const [total, users] = await prisma.$transaction([
         prisma.user.count({ where }),
         prisma.user.findMany({
             where,
