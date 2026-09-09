@@ -14,6 +14,8 @@ const auth_services_js_1 = require("../middleware/auth.services.js");
 const user_controller_js_1 = require("../controllers/user/user.controller.js");
 const doctor_api_js_1 = require("../controllers/doctor/doctor.api.js");
 const specialty_api_js_1 = require("../controllers/specialty/specialty.api.js");
+const package_api_js_1 = require("../controllers/package/package.api.js");
+const cart_api_js_1 = require("../controllers/cart/cart.api.js");
 exports.authRouter = express_1.default.Router();
 exports.adminRouter = express_1.default.Router();
 exports.userRouter = express_1.default.Router();
@@ -43,6 +45,15 @@ exports.userRouter.get('/doctors/:id', doctor_api_js_1.getDoctorDetailAPI);
 //specialty
 exports.userRouter.get('/specialties', specialty_api_js_1.getSpecialtiesAPI);
 exports.userRouter.get('/specialties/:id', specialty_api_js_1.getSpecialtiesDetailAPI);
+// package
+exports.userRouter.get('/packages', package_api_js_1.getPackagesAPI);
+exports.userRouter.get('/packages/:id', package_api_js_1.getPackagesDetailAPI);
+//cart
+exports.userRouter.get('/cart', cart_api_js_1.getCartsAPI);
+exports.userRouter.post('/cart/items', cart_api_js_1.postCartsAPI);
+exports.userRouter.put('/cart-quantity/:packageId', cart_api_js_1.updateCartQuantityAPI);
+exports.userRouter.delete('/carts/:packageId', cart_api_js_1.deleteCartsAPI);
+exports.userRouter.delete('/cart', cart_api_js_1.deleteCartsAPI);
 // ============================================================
 // DOCTOR ROUTES (Dành riêng cho Bác sĩ)
 // ============================================================
@@ -63,3 +74,17 @@ exports.adminRouter.post('/user-restore/:id', user_controller_js_1.restoreUserAP
 // specialty
 exports.adminRouter.get('/specialties', specialty_api_js_1.getSpecialtiesAPI);
 exports.adminRouter.get('/specialties/:id', specialty_api_js_1.getSpecialtiesDetailAPI);
+exports.adminRouter.post('/specialties', specialty_api_js_1.postSpecialtyAPI);
+exports.adminRouter.put('/specialties/:id', specialty_api_js_1.updateSpecialtyAPI);
+exports.adminRouter.delete('/specialties/:id', specialty_api_js_1.deleteSpecialtyAPI);
+exports.adminRouter.post('/specialties-restore/:id', specialty_api_js_1.restoreSpecialtyAPI);
+//package
+exports.adminRouter.get('/packages', package_api_js_1.getPackagesAPI);
+exports.adminRouter.get('/packages/:id', package_api_js_1.getPackagesDetailAPI);
+exports.adminRouter.post('/packages', package_api_js_1.postPackagesAPI);
+exports.adminRouter.put('/packages/:id', package_api_js_1.updatePackagesAPI);
+exports.adminRouter.delete('/packages/:id', package_api_js_1.deletePackagesAPI);
+exports.adminRouter.post('/packages-restore/:id', package_api_js_1.restorePackagesAPI);
+//cart
+exports.adminRouter.get('/carts', cart_api_js_1.getCartsAPI);
+exports.adminRouter.get('/carts/:id', cart_api_js_1.getCartDetailAdminAPI);

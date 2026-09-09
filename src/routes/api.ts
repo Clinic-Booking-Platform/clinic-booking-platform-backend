@@ -23,6 +23,13 @@ import {
     restorePackagesAPI,
     updatePackagesAPI,
 } from '../controllers/package/package.api.js';
+import {
+    deleteCartsAPI,
+    getCartDetailAdminAPI,
+    getCartsAPI,
+    postCartsAPI,
+    updateCartQuantityAPI,
+} from '../controllers/cart/cart.api.js';
 
 export const authRouter = express.Router();
 export const adminRouter = express.Router();
@@ -64,6 +71,14 @@ userRouter.get('/specialties/:id', getSpecialtiesDetailAPI);
 userRouter.get('/packages', getPackagesAPI);
 userRouter.get('/packages/:id', getPackagesDetailAPI);
 
+
+//cart
+userRouter.get('/cart', getCartsAPI);
+userRouter.post('/cart/items', postCartsAPI);
+userRouter.put('/cart-quantity/:packageId', updateCartQuantityAPI);
+userRouter.delete('/carts/:packageId', deleteCartsAPI);
+userRouter.delete('/cart', deleteCartsAPI);
+
 // ============================================================
 // DOCTOR ROUTES (Dành riêng cho Bác sĩ)
 // ============================================================
@@ -100,3 +115,8 @@ adminRouter.post('/packages', postPackagesAPI);
 adminRouter.put('/packages/:id', updatePackagesAPI);
 adminRouter.delete('/packages/:id', deletePackagesAPI);
 adminRouter.post('/packages-restore/:id', restorePackagesAPI);
+
+
+//cart
+adminRouter.get('/carts', getCartsAPI);
+adminRouter.get('/carts/:id', getCartDetailAdminAPI);

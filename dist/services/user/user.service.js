@@ -29,7 +29,7 @@ const getUsersService = async (options) => {
         ];
     }
     const skip = (page - 1) * constant_js_1.pageSize;
-    const [total, users] = await Promise.all([
+    const [total, users] = await client_js_1.prisma.$transaction([
         client_js_1.prisma.user.count({ where }),
         client_js_1.prisma.user.findMany({
             where,

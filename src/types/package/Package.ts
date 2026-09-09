@@ -1,8 +1,13 @@
+import { PriceRange } from '../../config/constant.js';
+
 export interface GetPackagesOptions {
     page?: number;
     pageSize?: number;
     search?: string;
     status?: 'all' | 'active' | 'deleted';
+    minPrice?: number;
+    maxPrice?: number;
+    priceRanges?: PriceRange[];
 }
 
 export interface CreatePackageData {

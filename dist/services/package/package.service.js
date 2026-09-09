@@ -1,74 +1,63 @@
-import { prisma } from '../../config/client.js';
-import { pageSize as defaultPageSize } from '../../config/constant.js';
-import {
-    CreatePackageData,
-    GetPackagesOptions,
-    UpdatePackageData,
-} from '../../types/package/Package.js';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.restorePackageService = exports.deletePackageService = exports.updatePackageService = exports.createPackageService = exports.getPackageByIdService = exports.getPackagesService = void 0;
+const client_js_1 = require("../../config/client.js");
+const constant_js_1 = require("../../config/constant.js");
 /**
  * Lấy danh sách gói khám
  * Hỗ trợ tìm kiếm theo tên, phân trang, và lọc trạng thái hoạt động
  */
-export const getPackagesService = async (options?: GetPackagesOptions) => {
+const getPackagesService = async (options) => {
     const search = options?.search?.trim();
     const status = options?.status || 'active'; // Mặc định chỉ lấy gói khám đang hoạt động
-
-    const where: any = {};
-
+    const where = {};
     if (status === 'active') {
         where.deleted_at = null;
-    } else if (status === 'deleted') {
+    }
+    else if (status === 'deleted') {
         where.deleted_at = { not: null };
     }
-
     if (search) {
         where.name = { contains: search };
     }
-
     // Lọc theo các khoảng giá tiền kết hợp mệnh đề OR (100-300, 300-500, 500-1000, tren-1000)
     let priceRanges = options?.priceRanges ? [...options.priceRanges] : [];
-
-    if (
-        priceRanges.length === 0 &&
-        (options?.minPrice !== undefined || options?.maxPrice !== undefined)
-    ) {
+    if (priceRanges.length === 0 &&
+        (options?.minPrice !== undefined || options?.maxPrice !== undefined)) {
         priceRanges.push({ min: options.minPrice, max: options.maxPrice });
     }
-
     if (priceRanges.length > 0) {
         const priceOrConditions = priceRanges.map((r) => {
-            const condition: any = {};
-            if (r.min !== undefined && !isNaN(r.min)) condition.gte = r.min;
-            if (r.max !== undefined && !isNaN(r.max)) condition.lte = r.max;
+            const condition = {};
+            if (r.min !== undefined && !isNaN(r.min))
+                condition.gte = r.min;
+            if (r.max !== undefined && !isNaN(r.max))
+                condition.lte = r.max;
             return { price: condition };
         });
-
         if (where.OR) {
             where.AND = [
                 { OR: where.OR },
                 { OR: priceOrConditions },
             ];
             delete where.OR;
-        } else {
+        }
+        else {
             where.OR = priceOrConditions;
         }
     }
-
     const page = Math.max(1, Number(options?.page || 1));
-    const size = options?.pageSize || defaultPageSize;
+    const size = options?.pageSize || constant_js_1.pageSize;
     const skip = (page - 1) * size;
-
-    const [total, packages] = await prisma.$transaction([
-        prisma.package.count({ where }),
-        prisma.package.findMany({
+    const [total, packages] = await client_js_1.prisma.$transaction([
+        client_js_1.prisma.package.count({ where }),
+        client_js_1.prisma.package.findMany({
             where,
             skip,
             take: size,
             orderBy: { id: 'asc' },
         }),
     ]);
-
     return {
         packages,
         pagination: {
@@ -79,49 +68,44 @@ export const getPackagesService = async (options?: GetPackagesOptions) => {
         },
     };
 };
-
+exports.getPackagesService = getPackagesService;
 /**
  * Lấy chi tiết 1 gói khám theo packageId
  * Kèm package_detail (html_content) nếu có
  */
-export const getPackageByIdService = async (packageId: number, includeDeleted: boolean = false) => {
-    const pkg = await prisma.package.findUnique({
+const getPackageByIdService = async (packageId, includeDeleted = false) => {
+    const pkg = await client_js_1.prisma.package.findUnique({
         where: { id: packageId },
         include: {
             package_detail: true,
         },
     });
-
     if (!pkg) {
         throw new Error('Gói khám không tồn tại');
     }
-
     if (pkg.deleted_at !== null && !includeDeleted) {
         throw new Error('Gói khám này hiện không còn hoạt động');
     }
-
     return pkg;
 };
-
+exports.getPackageByIdService = getPackageByIdService;
 /**
  * Thêm mới gói khám
  */
-export const createPackageService = async (data: CreatePackageData) => {
+const createPackageService = async (data) => {
     // Kiểm tra tên gói khám trùng lặp (trong số gói khám chưa xóa)
-    const existing = await prisma.package.findFirst({
+    const existing = await client_js_1.prisma.package.findFirst({
         where: {
             name: data.name,
             deleted_at: null,
         },
     });
-
     if (existing) {
         throw new Error('Tên gói khám này đã tồn tại');
     }
-
     // Dùng Interactive Transaction để tạo đồng thời Package và PackageDetail
     // Đảm bảo tính toàn vẹn (ACID): nếu 1 trong 2 lỗi thì tự động rollback
-    const newPackage = await prisma.$transaction(async (tx) => {
+    const newPackage = await client_js_1.prisma.$transaction(async (tx) => {
         const pkg = await tx.package.create({
             data: {
                 name: data.name,
@@ -131,7 +115,6 @@ export const createPackageService = async (data: CreatePackageData) => {
                 discount_price: data.discount_price,
             },
         });
-
         let packageDetail = null;
         if (data.html_content) {
             packageDetail = await tx.packageDetail.create({
@@ -141,47 +124,40 @@ export const createPackageService = async (data: CreatePackageData) => {
                 },
             });
         }
-
         return {
             ...pkg,
             package_detail: packageDetail,
         };
     });
-
     return true;
 };
-
+exports.createPackageService = createPackageService;
 /**
  * Cập nhật thông tin gói khám
  */
-export const updatePackageService = async (packageId: number, data: UpdatePackageData) => {
-    const pkg = await prisma.package.findUnique({
+const updatePackageService = async (packageId, data) => {
+    const pkg = await client_js_1.prisma.package.findUnique({
         where: { id: packageId },
     });
-
     if (!pkg) {
         throw new Error('Gói khám không tồn tại');
     }
-
     if (pkg.deleted_at !== null) {
         throw new Error('Gói khám này đã bị xóa, vui lòng khôi phục trước khi cập nhật');
     }
-
     // Nếu cập nhật tên, kiểm tra trùng lặp với gói khám khác
     if (data.name && data.name !== pkg.name) {
-        const existing = await prisma.package.findFirst({
+        const existing = await client_js_1.prisma.package.findFirst({
             where: {
                 name: data.name,
                 id: { not: packageId },
                 deleted_at: null,
             },
         });
-
         if (existing) {
             throw new Error('Tên gói khám này đã được sử dụng');
         }
     }
-
     // Nếu chỉ cập nhật discount_price mà không cập nhật price,
     // cần so sánh discount_price mới với price hiện tại
     if (data.discount_price != null && data.price == null) {
@@ -189,9 +165,8 @@ export const updatePackageService = async (packageId: number, data: UpdatePackag
             throw new Error('Giá khuyến mãi phải nhỏ hơn giá gốc');
         }
     }
-
     // Transaction cập nhật đồng thời thông tin Package và PackageDetail
-    await prisma.$transaction(async (tx) => {
+    await client_js_1.prisma.$transaction(async (tx) => {
         await tx.package.update({
             where: { id: packageId },
             data: {
@@ -202,7 +177,6 @@ export const updatePackageService = async (packageId: number, data: UpdatePackag
                 discount_price: data.discount_price,
             },
         });
-
         if (data.html_content !== undefined) {
             await tx.packageDetail.upsert({
                 where: { package_id: packageId },
@@ -215,73 +189,60 @@ export const updatePackageService = async (packageId: number, data: UpdatePackag
                 },
             });
         }
-
         return tx.package.findUnique({
             where: { id: packageId },
             include: { package_detail: true },
         });
     });
-
     return true;
 };
-
+exports.updatePackageService = updatePackageService;
 /**
  * Xóa mềm gói khám (Ngừng cung cấp)
  */
-export const deletePackageService = async (packageId: number) => {
-    const pkg = await prisma.package.findUnique({
+const deletePackageService = async (packageId) => {
+    const pkg = await client_js_1.prisma.package.findUnique({
         where: { id: packageId },
     });
-
     if (!pkg) {
         throw new Error('Gói khám không tồn tại');
     }
-
     if (pkg.deleted_at !== null) {
         throw new Error('Gói khám này đã bị xóa từ trước');
     }
-
     // Kiểm tra ràng buộc: Còn lịch hẹn liên kết với gói khám này không
-    const activeAppointmentsCount = await prisma.appointment.count({
+    const activeAppointmentsCount = await client_js_1.prisma.appointment.count({
         where: {
             package_id: packageId,
         },
     });
-
     if (activeAppointmentsCount > 0) {
-        throw new Error(
-            `Không thể xóa gói khám này vì vẫn còn ${activeAppointmentsCount} lịch hẹn liên kết`
-        );
+        throw new Error(`Không thể xóa gói khám này vì vẫn còn ${activeAppointmentsCount} lịch hẹn liên kết`);
     }
-
-    await prisma.package.update({
+    await client_js_1.prisma.package.update({
         where: { id: packageId },
         data: { deleted_at: new Date() },
     });
-
     return true;
 };
-
+exports.deletePackageService = deletePackageService;
 /**
  * Khôi phục gói khám đã bị xóa mềm
  */
-export const restorePackageService = async (packageId: number) => {
-    const pkg = await prisma.package.findUnique({
+const restorePackageService = async (packageId) => {
+    const pkg = await client_js_1.prisma.package.findUnique({
         where: { id: packageId },
     });
-
     if (!pkg) {
         throw new Error('Gói khám không tồn tại');
     }
-
     if (pkg.deleted_at === null) {
         throw new Error('Gói khám này đang hoạt động bình thường, không cần khôi phục');
     }
-
-    await prisma.package.update({
+    await client_js_1.prisma.package.update({
         where: { id: packageId },
         data: { deleted_at: null },
     });
-
     return true;
 };
+exports.restorePackageService = restorePackageService;
