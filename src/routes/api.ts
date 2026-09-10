@@ -37,6 +37,27 @@ import {
     statusBannersAPI,
     updateBannersAPI,
 } from '../controllers/banner/banner.api.js';
+import {
+    getSchedulesAPI,
+    getScheduleDetailAPI,
+    createScheduleAPI,
+    bulkCreateScheduleAPI,
+    updateScheduleAPI,
+    deleteScheduleAPI,
+} from '../controllers/schedule/schedule.api.js';
+import {
+    getPublicArticlesAPI,
+    getPublicArticleDetailAPI,
+    getDoctorArticlesAPI,
+    getDoctorArticleDetailAPI,
+    createDoctorArticleAPI,
+    updateDoctorArticleAPI,
+    getAdminArticlesAPI,
+    getAdminArticleDetailAPI,
+    createAdminArticleAPI,
+    updateAdminArticleAPI,
+    deleteAdminArticleAPI,
+} from '../controllers/article/article.api.js';
 
 export const authRouter = express.Router();
 export const adminRouter = express.Router();
@@ -58,6 +79,12 @@ authRouter.post('/register', registerAPI);
 // ============================================================
 authRouter.post('/upload/single', authMiddlewareClients, uploadSingleMiddleware('file'), uploadSingleFile);
 authRouter.post('/upload/multiple', authMiddlewareClients, uploadMultipleMiddleware('files', 10), uploadMultipleFiles);
+
+// ============================================================
+// ARTICLES (public - không cần JWT)
+// ============================================================
+authRouter.get('/articles', getPublicArticlesAPI);
+authRouter.get('/articles/:slug', getPublicArticleDetailAPI);
 
 // ============================================================
 // CLIENTS ROUTES (User / Doctor / Admin đã đăng nhập)
@@ -89,10 +116,29 @@ userRouter.delete('/cart', deleteCartsAPI);
 //banner
 userRouter.get('/banners', getBannersAPI);
 
+//schedule – Xem lịch trống của bác sĩ để đặt lịch
+userRouter.get('/schedules', getSchedulesAPI);
+userRouter.get('/schedules/:id', getScheduleDetailAPI);
+
+//article – Xem bài viết
+userRouter.get('/articles', getPublicArticlesAPI);
+userRouter.get('/articles/:slug', getPublicArticleDetailAPI);
 
 // ============================================================
 // DOCTOR ROUTES (Dành riêng cho Bác sĩ)
 // ============================================================
+// schedule – Quản lý lịch làm việc của bác sĩ
+doctorRouter.get('/schedules', getSchedulesAPI);
+doctorRouter.get('/schedules/:id', getScheduleDetailAPI);
+doctorRouter.post('/schedules', createScheduleAPI);
+doctorRouter.post('/schedules/bulk', bulkCreateScheduleAPI);
+doctorRouter.put('/schedules/:id', updateScheduleAPI);
+
+// article – Quản lý bài viết của bác sĩ
+doctorRouter.get('/articles', getDoctorArticlesAPI);
+doctorRouter.get('/articles/:id', getDoctorArticleDetailAPI);
+doctorRouter.post('/articles', createDoctorArticleAPI);
+doctorRouter.put('/articles/:id', updateDoctorArticleAPI);
 
 // ============================================================
 // ADMIN ROUTES (Dành riêng cho Quản trị viên)
@@ -139,3 +185,18 @@ adminRouter.post('/banners', postBannersAPI);
 adminRouter.put('/banners/:id', updateBannersAPI);
 adminRouter.put('/banners-status/:id', statusBannersAPI);
 adminRouter.delete('/banners/:id', deleteBannersAPI);
+
+//schedule – Quản lý lịch làm việc (full quyền + xóa cứng)
+adminRouter.get('/schedules', getSchedulesAPI);
+adminRouter.get('/schedules/:id', getScheduleDetailAPI);
+adminRouter.post('/schedules', createScheduleAPI);
+adminRouter.post('/schedules/bulk', bulkCreateScheduleAPI);
+adminRouter.put('/schedules/:id', updateScheduleAPI);
+adminRouter.delete('/schedules/:id', deleteScheduleAPI);
+
+//article – Quản lý bài viết (full quyền + xóa mềm)
+adminRouter.get('/articles', getAdminArticlesAPI);
+adminRouter.get('/articles/:id', getAdminArticleDetailAPI);
+adminRouter.post('/articles', createAdminArticleAPI);
+adminRouter.put('/articles/:id', updateAdminArticleAPI);
+adminRouter.delete('/articles/:id', deleteAdminArticleAPI);

@@ -1,0 +1,386 @@
+{
+  "info": {
+    "name": "Schedule Management API",
+    "description": "API Quản lý lịch trình - Clinic Booking Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "user_token",
+      "value": "YOUR_USER_TOKEN"
+    },
+    {
+      "key": "doctor_token",
+      "value": "YOUR_DOCTOR_TOKEN"
+    },
+    {
+      "key": "admin_token",
+      "value": "YOUR_ADMIN_TOKEN"
+    }
+  ],
+  "item": [
+    {
+      "name": "👤 User",
+      "description": "User xem lịch trống để đặt khám (bắt buộc phải chọn doctor_id)",
+      "item": [
+        {
+          "name": "1. Test lỗi 400 khi KHÔNG truyền doctor_id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Xem lịch trống theo Bác sĩ (Hợp lệ)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/schedules?doctor_id=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "schedules"
+              ],
+              "query": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Xem lịch trống theo Bác sĩ + Ngày cụ thể",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/schedules?doctor_id=1&date=2026-09-20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "schedules"
+              ],
+              "query": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-09-20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Xem chi tiết 1 ca khám",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/schedules/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "schedules",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🩺 Doctor",
+      "description": "Doctor xem/tạo/cập nhật lịch của mình (doctor_id tự lấy từ token hoặc có thể truyền)",
+      "item": [
+        {
+          "name": "1. Xem danh sách lịch của mình (Tự nhận diện token)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/doctor/schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctor",
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Xem lịch kèm truyền doctor_id cụ thể",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/doctor/schedules?doctor_id=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctor",
+                "schedules"
+              ],
+              "query": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Xem chi tiết 1 ca",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/doctor/schedules/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctor",
+                "schedules",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Tạo 1 ca làm việc (Có doctor_id hoặc không cần truyền)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": 1,\n  \"date\": \"2026-09-20\",\n  \"time_type\": \"T1\",\n  \"max_number\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/doctor/schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctor",
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Tạo nhiều ca cùng lúc (Bulk)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": 1,\n  \"date\": \"2026-09-20\",\n  \"time_types\": [\n    \"T1\",\n    \"T2\",\n    \"T3\",\n    \"T4\",\n    \"T5\",\n    \"T6\"\n  ],\n  \"max_number\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/doctor/schedules/bulk",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctor",
+                "schedules",
+                "bulk"
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Cập nhật ca làm việc (max_number, status)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"max_number\": 15,\n  \"status\": \"AVAILABLE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/doctor/schedules/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctor",
+                "schedules",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔑 Admin",
+      "description": "Admin full quyền (tạo bất kỳ, xem tất cả, sửa, xóa cứng)",
+      "item": [
+        {
+          "name": "1. Xem tất cả lịch làm việc",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Tạo lịch cho Bác sĩ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": 1,\n  \"date\": \"2026-09-20\",\n  \"time_type\": \"T1\",\n  \"max_number\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Xóa cứng ca làm việc",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/schedules/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "schedules",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

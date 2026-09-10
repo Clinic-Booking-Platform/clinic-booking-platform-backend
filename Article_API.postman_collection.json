@@ -1,0 +1,398 @@
+{
+	"info": {
+		"_postman_id": "4e757a3e-6d1a-472d-bb4a-a9e9a4f6d3a3",
+		"name": "Article API (Quản lý bài viết)",
+		"description": "Bộ API Quản lý bài viết hoàn chỉnh theo Use Case Diagram (User, Doctor, Admin)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "user_token",
+			"value": "YOUR_USER_TOKEN",
+			"type": "string"
+		},
+		{
+			"key": "doctor_token",
+			"value": "YOUR_DOCTOR_TOKEN",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "YOUR_ADMIN_TOKEN",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "👤 User",
+			"description": "Dành cho User / Khách vãng lai (Public - Xem danh sách và chi tiết bài viết)",
+			"item": [
+				{
+					"name": "1. Xem danh sách bài viết (Public / User)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/articles?page=1&search=&specialty_id=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"articles"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Số trang (mặc định 1)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Tìm kiếm theo tiêu đề"
+								},
+								{
+									"key": "specialty_id",
+									"value": "",
+									"description": "Lọc theo ID chuyên khoa"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Xem chi tiết bài viết (bằng slug)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/articles/cach-tri-mun-hieu-qua",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"articles",
+								"cach-tri-mun-hieu-qua"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Xem chi tiết bài viết (bằng ID)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/articles/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"articles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👨‍⚕️ Doctor",
+			"description": "Dành cho Bác sĩ (Quản lý bài viết của chính mình)",
+			"item": [
+				{
+					"name": "1. Xem danh sách bài viết của bác sĩ",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+							"raw": "{{base_url}}/doctor/articles?page=1&status=all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctor",
+								"articles"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "status",
+									"value": "all",
+									"description": "all (mặc định cho Bác sĩ - xem cả bài hoạt động & đã xóa của mình), active (chỉ bài hoạt động), deleted (chỉ bài đã xóa)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Xem chi tiết bài viết",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/doctor/articles/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctor",
+								"articles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Đăng bài viết mới",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Phương pháp điều trị viêm xoang mùa đông\",\r\n    \"thumbnail_url\": \"https://images.unsplash.com/photo-1576091160399-112ba8d25d1d\",\r\n    \"short_description\": \"Tổng hợp các phương pháp giảm đau xoang hiệu quả\",\r\n    \"html_content\": \"<p>Viêm xoang là tình trạng phổ biến...</p>\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/doctor/articles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctor",
+								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Cập nhật bài viết của mình",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Phương pháp điều trị viêm xoang mùa đông (Cập nhật 2026)\",\r\n    \"short_description\": \"Cập nhật hướng dẫn dùng thuốc mới nhất\",\r\n    \"html_content\": \"<p>Nội dung chi tiết cập nhật mới...</p>\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/doctor/articles/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctor",
+								"articles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👑 Admin",
+			"description": "Dành cho Admin (Toàn quyền quản lý tất cả bài viết)",
+			"item": [
+				{
+					"name": "1. Xem danh sách tất cả bài viết",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/admin/articles?page=1&status=all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"articles"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "status",
+									"value": "all",
+									"description": "all (mặc định cho Admin - xem cả bài hoạt động & đã xóa), active (chỉ bài hoạt động), deleted (chỉ bài đã xóa)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Xem chi tiết bài viết",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/admin/articles/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"articles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Đăng bài viết mới (Admin gán author_id)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Cẩm nang chăm sóc sức khỏe tim mạch\",\r\n    \"thumbnail_url\": \"https://images.unsplash.com/photo-1505751172876-fa1923c5c528\",\r\n    \"short_description\": \"Lời khuyên từ các chuyên gia tim mạch hàng đầu\",\r\n    \"html_content\": \"<p>Bệnh tim mạch là nguyên nhân gây tử vong hàng đầu...</p>\",\r\n    \"author_id\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/articles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Cập nhật bài viết bất kỳ",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Cẩm nang chăm sóc sức khỏe tim mạch (Đã kiểm duyệt)\",\r\n    \"short_description\": \"Nội dung đã được biên tập và phê duyệt\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/articles/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"articles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Xóa mềm bài viết",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/admin/articles/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"articles",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
