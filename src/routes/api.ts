@@ -58,6 +58,15 @@ import {
     updateAdminArticleAPI,
     deleteAdminArticleAPI,
 } from '../controllers/article/article.api.js';
+import {
+    createAppointmentAPI,
+    bookFromOrderAPI
+} from '../controllers/appointment/appointment.api.js';
+import {
+    checkoutCartPaymentAPI,
+    verifyPaymentReturnAPI,
+    getBankListAPI,
+} from '../controllers/payment/payment.api.js';
 
 export const authRouter = express.Router();
 export const adminRouter = express.Router();
@@ -87,6 +96,12 @@ authRouter.get('/articles', getPublicArticlesAPI);
 authRouter.get('/articles/:slug', getPublicArticleDetailAPI);
 
 // ============================================================
+// PAYMENT CALLBACK & PUBLIC INFO (không cần JWT)
+// ============================================================
+authRouter.get('/payment/vnpay-return', verifyPaymentReturnAPI);
+authRouter.get('/payment/banks', getBankListAPI);
+
+// ============================================================
 // CLIENTS ROUTES (User / Doctor / Admin đã đăng nhập)
 // ============================================================
 // me
@@ -111,7 +126,7 @@ userRouter.get('/cart', getCartsAPI);
 userRouter.post('/cart/items', postCartsAPI);
 userRouter.put('/cart-quantity/:packageId', updateCartQuantityAPI);
 userRouter.delete('/carts/:packageId', deleteCartsAPI);
-userRouter.delete('/cart', deleteCartsAPI);
+// userRouter.delete('/cart', deleteCartsAPI);
 
 //banner
 userRouter.get('/banners', getBannersAPI);
@@ -123,6 +138,13 @@ userRouter.get('/schedules/:id', getScheduleDetailAPI);
 //article – Xem bài viết
 userRouter.get('/articles', getPublicArticlesAPI);
 userRouter.get('/articles/:slug', getPublicArticleDetailAPI);
+
+//appointment – Đặt lịch khám Offline & Từ đơn hàng
+userRouter.post('/appointments', createAppointmentAPI);
+userRouter.post('/appointments/book-from-order/:id', bookFromOrderAPI);
+
+//payment – Thanh toán giỏ hàng qua VNPay 
+userRouter.post('/payment/checkout-cart', checkoutCartPaymentAPI);
 
 // ============================================================
 // DOCTOR ROUTES (Dành riêng cho Bác sĩ)

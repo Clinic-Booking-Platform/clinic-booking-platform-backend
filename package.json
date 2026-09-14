@@ -38,6 +38,7 @@
     "swagger-ui-express": "^5.0.1",
     "sweetalert2": "^11.26.25",
     "uuid": "^14.0.1",
+    "vnpay": "^2.5.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

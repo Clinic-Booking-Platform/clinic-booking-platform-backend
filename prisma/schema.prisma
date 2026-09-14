@@ -135,7 +135,7 @@ model Appointment {
   user_id          Int
   doctor_id        Int?
   package_id       Int?
-  order_id         Int?      @unique // null nếu đặt Offline, có giá trị nếu đặt/thanh toán Online
+  order_id         Int?      // null nếu đặt Offline, có giá trị nếu đặt/thanh toán Online
   appointment_type String    @db.VarChar(50) // e.g. "OFFLINE" | "ONLINE"
   meeting_link     String?   @db.VarChar(255)
   date             DateTime  @db.Date
@@ -147,10 +147,11 @@ model Appointment {
   deleted_at       DateTime?
 
   // Relations
-  user    User     @relation(fields: [user_id], references: [id])
-  doctor  Doctor?  @relation(fields: [doctor_id], references: [id])
-  package Package? @relation(fields: [package_id], references: [id])
-  order   Order?   @relation(fields: [order_id], references: [id])
+  user           User           @relation(fields: [user_id], references: [id])
+  doctor         Doctor?        @relation(fields: [doctor_id], references: [id])
+  package        Package?       @relation(fields: [package_id], references: [id])
+  order          Order?         @relation(fields: [order_id], references: [id])
+  medical_record MedicalRecord?
 
   @@map("appointments")
 }
@@ -234,7 +235,7 @@ model Order {
   // Relations
   user          User          @relation(fields: [user_id], references: [id])
   order_details OrderDetail[]
-  appointment   Appointment?
+  appointments  Appointment[]
 
   @@map("orders")
 }
@@ -265,4 +266,82 @@ model Banner {
   is_active  Boolean @default(true)
 
   @@map("banners")
+}
+
+// ============================================================
+// 10. MEDICAL RECORDS (Hồ sơ bệnh án)
+// ============================================================
+model MedicalRecord {
+  id              Int       @id @default(autoincrement())
+  appointment_id  Int       @unique // Mỗi cuộc hẹn có tối đa 1 hồ sơ bệnh án
+  record_code     String    @unique @db.VarChar(50) // Mã bệnh án: VD BA20260914-001
+
+  // --- Triệu chứng & Khám lâm sàng ---
+  symptoms             String?  @db.Text         // Triệu chứng chi tiết khi vào khám
+  clinical_examination String?  @db.Text         // Kết quả khám lâm sàng
+
+  // --- Chẩn đoán ---
+  diagnosis            String   @db.VarChar(255) // Chẩn đoán xác định (VD: Viêm phế quản cấp)
+  icd10_code           String?  @db.VarChar(20)  // Mã bệnh ICD-10 (VD: J20)
+  icd10_name           String?  @db.VarChar(255) // Tên bệnh theo ICD-10
+
+  // --- Sinh hiệu (Vital Signs) ---
+  blood_pressure       String?  @db.VarChar(20)  // Huyết áp (VD: "120/80")
+  pulse                Int?                      // Mạch (lần/phút)
+  temperature          Decimal? @db.Decimal(4, 1)// Nhiệt độ (°C, VD: 37.2)
+  weight               Decimal? @db.Decimal(5, 2)// Cân nặng (kg)
+  height               Decimal? @db.Decimal(5, 2)// Chiều cao (cm)
+
+  // --- Lời dặn & Tái khám ---
+  doctor_advice        String?   @db.Text        // Lời dặn chế độ ăn uống, nghỉ ngơi
+  re_examination_date  DateTime? @db.Date        // Hẹn ngày tái khám
+
+  // --- Hình thức khám ---
+  consultation_type    String    @default("OFFLINE") @db.VarChar(20) // "OFFLINE" hoặc "ONLINE"
+  recommendation       String?   @db.Text        // Khuyến nghị: "Cần đến khám trực tiếp", "Tự theo dõi tại nhà"
+
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  // Relations
+  appointment  Appointment               @relation(fields: [appointment_id], references: [id])
+  prescriptions PrescriptionItem[]
+  attachments   MedicalRecordAttachment[]
+
+  @@map("medical_records")
+}
+
+// ============================================================
+// 11. PRESCRIPTION ITEMS (Chi tiết đơn thuốc)
+// ============================================================
+model PrescriptionItem {
+  id                Int    @id @default(autoincrement())
+  medical_record_id Int
+  medicine_name     String @db.VarChar(255)  // Tên thuốc (VD: Paracetamol 500mg)
+  dosage            String @db.VarChar(100)  // Liều dùng (VD: Sáng 1 viên, Tối 1 viên)
+  quantity          Int                      // Số lượng (VD: 10)
+  unit              String @db.VarChar(50)   // Đơn vị (viên, gói, chai)
+  instructions      String? @db.VarChar(255) // Hướng dẫn: Uống sau khi ăn no
+
+  // Relations
+  medical_record MedicalRecord @relation(fields: [medical_record_id], references: [id], onDelete: Cascade)
+
+  @@map("prescription_items")
+}
+
+// ============================================================
+// 12. MEDICAL RECORD ATTACHMENTS (Tệp đính kèm: Xét nghiệm, X-quang)
+// ============================================================
+model MedicalRecordAttachment {
+  id                Int      @id @default(autoincrement())
+  medical_record_id Int
+  file_url          String   @db.VarChar(500)  // Đường dẫn file
+  file_name         String   @db.VarChar(255)  // Tên file gốc
+  description       String?  @db.VarChar(255)  // Mô tả (VD: Kết quả xét nghiệm máu)
+  created_at        DateTime @default(now())
+
+  // Relations
+  medical_record MedicalRecord @relation(fields: [medical_record_id], references: [id], onDelete: Cascade)
+
+  @@map("medical_record_attachments")
 }
