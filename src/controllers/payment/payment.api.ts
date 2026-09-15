@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
     checkoutCartPaymentService,
     getBankListService,
+    repayOrderPaymentService,
     verifyPaymentReturnService,
 } from '../../services/payment/payment.service.js';
 import { CheckoutCartPaymentSchema } from '../../model/Schema/Payment/Payment_Schema.js';
@@ -99,3 +100,49 @@ export const getBankListAPI = async (req: Request, res: Response) => {
         });
     }
 };
+
+/**
+ * POST /payment/repay/:id
+ * Thanh toán lại đơn hàng chưa thanh toán (UNPAID hoặc FAILED)
+ */
+export const repayOrderPaymentAPI = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Vui lòng đăng nhập để thanh toán lại đơn hàng',
+            });
+        }
+
+        const rawId = req.params.id;
+        const identifier = Array.isArray(rawId) ? rawId[0] : rawId;
+        if (!identifier) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Mã hoặc ID đơn hàng không hợp lệ',
+            });
+        }
+
+        const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+
+        const result = await repayOrderPaymentService(
+            Number(userId),
+            identifier,
+            clientIp.includes('::') ? '127.0.0.1' : clientIp
+        );
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Khởi tạo đường dẫn thanh toán lại VNPay thành công',
+            data: result,
+        });
+    } catch (error: any) {
+        const statusCode = error.message?.includes('Không tìm thấy') ? 404 : 400;
+        return res.status(statusCode).json({
+            status: 'error',
+            message: error.message || 'Lỗi khi khởi tạo thanh toán lại',
+        });
+    }
+};
+

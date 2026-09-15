@@ -26,6 +26,7 @@ export const PaymentStatus = {
     UNPAID: 'UNPAID',
     PAID: 'PAID',
     FAILED: 'FAILED',
+    CANCELLED: 'CANCELLED',
 } as const;
 
 export type PaymentStatusType = (typeof PaymentStatus)[keyof typeof PaymentStatus];
@@ -62,6 +63,7 @@ export const TimeTypeMap: Record<string, TimeSlot> = {
 };
 
 export const pageSize = 5;
+export const ORDER_PAYMENT_TIMEOUT_MINUTES = 15;
 
 export interface PriceRange {
     min?: number;

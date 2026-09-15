@@ -66,7 +66,15 @@ import {
     checkoutCartPaymentAPI,
     verifyPaymentReturnAPI,
     getBankListAPI,
+    repayOrderPaymentAPI,
 } from '../controllers/payment/payment.api.js';
+import {
+    getOrdersAPI,
+    getOrderDetailAPI,
+    cancelOrderAPI,
+    getOrderAdminsAPI,
+    getOrderDetailAdminAPI,
+} from '../controllers/order/order.api.js';
 
 export const authRouter = express.Router();
 export const adminRouter = express.Router();
@@ -145,6 +153,14 @@ userRouter.post('/appointments/book-from-order/:id', bookFromOrderAPI);
 
 //payment – Thanh toán giỏ hàng qua VNPay 
 userRouter.post('/payment/checkout-cart', checkoutCartPaymentAPI);
+userRouter.post('/payment/repay/:id', repayOrderPaymentAPI);
+
+//order – Đơn hàng của người dùng
+userRouter.get('/orders', getOrdersAPI);
+userRouter.get('/orders/:id', getOrderDetailAPI);
+userRouter.delete('/orders/:id', cancelOrderAPI);
+
+
 
 // ============================================================
 // DOCTOR ROUTES (Dành riêng cho Bác sĩ)
@@ -222,3 +238,7 @@ adminRouter.get('/articles/:id', getAdminArticleDetailAPI);
 adminRouter.post('/articles', createAdminArticleAPI);
 adminRouter.put('/articles/:id', updateAdminArticleAPI);
 adminRouter.delete('/articles/:id', deleteAdminArticleAPI);
+
+//order - Quản lý đơn hàng 
+adminRouter.get('/orders', getOrderAdminsAPI);
+adminRouter.get('/orders/:id', getOrderDetailAdminAPI);

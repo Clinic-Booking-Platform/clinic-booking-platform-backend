@@ -1,7 +1,8 @@
-import { ProductCode, VnpLocale } from 'vnpay';
+import { ProductCode, VnpLocale, dateFormat } from 'vnpay';
+import dayjs from 'dayjs';
 import { prisma } from '../../config/client.js';
 import { vnpay } from '../../config/vnpay.js';
-import { PaymentMethod, PaymentStatus } from '../../config/constant.js';
+import { PaymentMethod, PaymentStatus, ORDER_PAYMENT_TIMEOUT_MINUTES } from '../../config/constant.js';
 import {
     CheckoutCartData,
     CreatePaymentUrlResult,
@@ -51,7 +52,10 @@ export const checkoutCartPaymentService = async (
             },
         });
 
-        // 4. Sinh URL thanh toán VNPay
+        // 4. Sinh URL thanh toán VNPay (kèm thời hạn 15 phút đếm ngược trên VNPay)
+        const now = new Date();
+        const expireDate = new Date(now.getTime() + ORDER_PAYMENT_TIMEOUT_MINUTES * 60 * 1000);
+
         const paymentUrl = vnpay.buildPaymentUrl({
             vnp_Amount: totalAmount,
             vnp_IpAddr: data.client_ip || '127.0.0.1',
@@ -60,6 +64,8 @@ export const checkoutCartPaymentService = async (
             vnp_OrderType: ProductCode.Pharmacy_MedicalServices,
             vnp_ReturnUrl: process.env.VNP_RETURN_URL || 'http://localhost:8080/payment/vnpay-return',
             vnp_Locale: VnpLocale.VN,
+            vnp_CreateDate: dateFormat(now),
+            vnp_ExpireDate: dateFormat(expireDate),
         });
 
         return {
@@ -133,16 +139,24 @@ export const verifyPaymentReturnService = async (
                 order_code: orderCode,
             };
         } else {
-            // Thanh toán THẤT BẠI hoặc KHÁCH HỦY
+            // Thanh toán THẤT BẠI, KHÁCH HỦY hoặc HẾT HẠN
+            const responseCode = query.vnp_ResponseCode as string;
+            const isTimeout = responseCode === '11';
+
             await tx.order.update({
                 where: { id: order.id },
-                data: { payment_status: PaymentStatus.FAILED },
+                data: {
+                    payment_status: PaymentStatus.FAILED,
+                    ...(isTimeout ? { deleted_at: new Date() } : {}),
+                },
             });
 
             return {
                 isSuccess: false,
                 isVerified: verify.isVerified,
-                message: 'Giao dịch thanh toán không thành công hoặc đã bị hủy.',
+                message: isTimeout
+                    ? 'Giao dịch đã hết thời gian thanh toán (15 phút).'
+                    : 'Giao dịch thanh toán không thành công hoặc đã bị hủy.',
                 order_code: orderCode,
             };
         }
@@ -155,3 +169,73 @@ export const verifyPaymentReturnService = async (
 export const getBankListService = async () => {
     return await vnpay.getBankList();
 };
+
+/**
+ * Thanh toán lại đơn hàng chưa thanh toán (UNPAID hoặc FAILED)
+ * - Tái sử dụng order_code và total_price có sẵn để sinh URL VNPay mới
+ */
+export const repayOrderPaymentService = async (
+    userId: number,
+    identifier: string | number,
+    clientIp?: string
+): Promise<CreatePaymentUrlResult> => {
+    const isNumeric = typeof identifier === 'number' || /^\d+$/.test(String(identifier));
+    const where: any = {
+        user_id: userId,
+        ...(isNumeric ? { id: Number(identifier) } : { order_code: String(identifier) }),
+    };
+
+    const order = await prisma.order.findFirst({ where });
+
+    if (!order) {
+        throw new Error('Không tìm thấy đơn hàng hoặc đơn hàng không thuộc về bạn');
+    }
+
+    if (order.deleted_at !== null) {
+        throw new Error('Đơn hàng này đã bị hủy, không thể thanh toán lại. Vui lòng chọn gói khám và tạo đơn mới.');
+    }
+
+    if (order.payment_status === PaymentStatus.PAID) {
+        throw new Error('Đơn hàng này đã được thanh toán thành công, không cần thanh toán lại.');
+    }
+
+    // Kiểm tra thời gian hết hạn (quá 15 phút kể từ lúc tạo đơn)
+    const orderCreatedAt = dayjs(order.created_at);
+    const now = dayjs();
+    const minutesPassed = now.diff(orderCreatedAt, 'minute', true);
+
+    if (minutesPassed >= ORDER_PAYMENT_TIMEOUT_MINUTES) {
+        await prisma.order.update({
+            where: { id: order.id },
+            data: {
+                payment_status: PaymentStatus.FAILED,
+                deleted_at: new Date(),
+            },
+        });
+        throw new Error(
+            `Đơn hàng đã hết hạn thanh toán (quá ${ORDER_PAYMENT_TIMEOUT_MINUTES} phút kể từ lúc tạo) và đã bị hủy. Vui lòng chọn lại gói khám để tạo đơn hàng mới.`
+        );
+    }
+
+    const totalAmount = Number(order.total_price);
+    const expireTime = orderCreatedAt.add(ORDER_PAYMENT_TIMEOUT_MINUTES, 'minute').toDate();
+
+    const paymentUrl = vnpay.buildPaymentUrl({
+        vnp_Amount: totalAmount,
+        vnp_IpAddr: clientIp || '127.0.0.1',
+        vnp_TxnRef: order.order_code,
+        vnp_OrderInfo: `Thanh toan don hang ${order.order_code}`,
+        vnp_OrderType: ProductCode.Pharmacy_MedicalServices,
+        vnp_ReturnUrl: process.env.VNP_RETURN_URL || 'http://localhost:8080/payment/vnpay-return',
+        vnp_Locale: VnpLocale.VN,
+        vnp_CreateDate: dateFormat(new Date()),
+        vnp_ExpireDate: dateFormat(expireTime),
+    });
+
+    return {
+        order_code: order.order_code,
+        payment_url: paymentUrl,
+        total_price: totalAmount,
+    };
+};
+
