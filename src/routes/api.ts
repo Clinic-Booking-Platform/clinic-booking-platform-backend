@@ -60,7 +60,18 @@ import {
 } from '../controllers/article/article.api.js';
 import {
     createAppointmentAPI,
-    bookFromOrderAPI
+    bookFromOrderAPI,
+    getAppointmentsAPI,
+    getAppointmentDetailAPI,
+    cancelAppointmentAPI,
+    getDoctorAppointmentsAPI,
+    getDoctorAppointmentDetailAPI,
+    cancelDoctorAppointmentAPI,
+    updateDoctorAppointmentStatusAPI,
+    getAdminAppointmentsAPI,
+    getAdminAppointmentDetailAPI,
+    cancelAdminAppointmentAPI,
+    updateAdminAppointmentStatusAPI,
 } from '../controllers/appointment/appointment.api.js';
 import {
     checkoutCartPaymentAPI,
@@ -147,9 +158,12 @@ userRouter.get('/schedules/:id', getScheduleDetailAPI);
 userRouter.get('/articles', getPublicArticlesAPI);
 userRouter.get('/articles/:slug', getPublicArticleDetailAPI);
 
-//appointment – Đặt lịch khám Offline & Từ đơn hàng
+//appointment – Đặt lịch khám Offline & Từ đơn hàng, Xem lịch sử, Chi tiết, Hủy lịch
 userRouter.post('/appointments', createAppointmentAPI);
 userRouter.post('/appointments/book-from-order/:id', bookFromOrderAPI);
+userRouter.get('/appointments', getAppointmentsAPI);
+userRouter.get('/appointments/:id', getAppointmentDetailAPI);
+userRouter.delete('/appointments/:id', cancelAppointmentAPI);
 
 //payment – Thanh toán giỏ hàng qua VNPay 
 userRouter.post('/payment/checkout-cart', checkoutCartPaymentAPI);
@@ -177,6 +191,12 @@ doctorRouter.get('/articles', getDoctorArticlesAPI);
 doctorRouter.get('/articles/:id', getDoctorArticleDetailAPI);
 doctorRouter.post('/articles', createDoctorArticleAPI);
 doctorRouter.put('/articles/:id', updateDoctorArticleAPI);
+
+// appointment – Quản lý lịch hẹn của bác sĩ (chỉ xem lịch của bản thân)
+doctorRouter.get('/appointments', getDoctorAppointmentsAPI);
+doctorRouter.get('/appointments/:id', getDoctorAppointmentDetailAPI);
+doctorRouter.delete('/appointments/:id', cancelDoctorAppointmentAPI);
+doctorRouter.put('/appointments/:id/status', updateDoctorAppointmentStatusAPI);
 
 // ============================================================
 // ADMIN ROUTES (Dành riêng cho Quản trị viên)
@@ -242,3 +262,10 @@ adminRouter.delete('/articles/:id', deleteAdminArticleAPI);
 //order - Quản lý đơn hàng 
 adminRouter.get('/orders', getOrderAdminsAPI);
 adminRouter.get('/orders/:id', getOrderDetailAdminAPI);
+
+
+//appointment – Quản lý lịch hẹn khám (full quyền)
+adminRouter.get('/appointments', getAdminAppointmentsAPI);
+adminRouter.get('/appointments/:id', getAdminAppointmentDetailAPI);
+adminRouter.delete('/appointments/:id', cancelAdminAppointmentAPI);
+adminRouter.put('/appointments/:id/status', updateAdminAppointmentStatusAPI);

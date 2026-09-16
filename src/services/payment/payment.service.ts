@@ -84,11 +84,14 @@ export const verifyPaymentReturnService = async (
 ): Promise<VerifyReturnResult> => {
     // 1. Dùng SDK verify chữ ký số và mã phản hồi
     const verify = vnpay.verifyReturnUrl(query as any);
-    const orderCode = query.vnp_TxnRef as string;
+    const rawTxnRef = query.vnp_TxnRef as string;
 
-    if (!orderCode) {
+    if (!rawTxnRef) {
         throw new Error('Mã giao dịch không hợp lệ');
     }
+
+    // Tách lấy order_code gốc nếu vnp_TxnRef có hậu tố _timestamp khi thanh toán lại
+    const orderCode = rawTxnRef.split('_')[0];
 
     // 2. Tìm đơn hàng
     const order = await prisma.order.findUnique({
@@ -199,36 +202,32 @@ export const repayOrderPaymentService = async (
         throw new Error('Đơn hàng này đã được thanh toán thành công, không cần thanh toán lại.');
     }
 
-    // Kiểm tra thời gian hết hạn (quá 15 phút kể từ lúc tạo đơn)
-    const orderCreatedAt = dayjs(order.created_at);
-    const now = dayjs();
-    const minutesPassed = now.diff(orderCreatedAt, 'minute', true);
+    // Khi thanh toán lại, cấp một phiên thanh toán VNPay mới trọn vẹn 15 phút
+    const now = new Date();
+    const expireTime = new Date(now.getTime() + ORDER_PAYMENT_TIMEOUT_MINUTES * 60 * 1000);
 
-    if (minutesPassed >= ORDER_PAYMENT_TIMEOUT_MINUTES) {
-        await prisma.order.update({
-            where: { id: order.id },
-            data: {
-                payment_status: PaymentStatus.FAILED,
-                deleted_at: new Date(),
-            },
-        });
-        throw new Error(
-            `Đơn hàng đã hết hạn thanh toán (quá ${ORDER_PAYMENT_TIMEOUT_MINUTES} phút kể từ lúc tạo) và đã bị hủy. Vui lòng chọn lại gói khám để tạo đơn hàng mới.`
-        );
-    }
+    // Cập nhật lại thời gian đơn hàng và trạng thái UNPAID để đồng bộ với phiên VNPay mới
+    await prisma.order.update({
+        where: { id: order.id },
+        data: {
+            created_at: now,
+            payment_status: PaymentStatus.UNPAID,
+        },
+    });
 
     const totalAmount = Number(order.total_price);
-    const expireTime = orderCreatedAt.add(ORDER_PAYMENT_TIMEOUT_MINUTES, 'minute').toDate();
+    // Gắn hậu tố timestamp vào vnp_TxnRef để đảm bảo tính duy nhất trên cổng VNPay
+    const vnpTxnRef = `${order.order_code}_${Date.now()}`;
 
     const paymentUrl = vnpay.buildPaymentUrl({
         vnp_Amount: totalAmount,
         vnp_IpAddr: clientIp || '127.0.0.1',
-        vnp_TxnRef: order.order_code,
+        vnp_TxnRef: vnpTxnRef,
         vnp_OrderInfo: `Thanh toan don hang ${order.order_code}`,
         vnp_OrderType: ProductCode.Pharmacy_MedicalServices,
         vnp_ReturnUrl: process.env.VNP_RETURN_URL || 'http://localhost:8080/payment/vnpay-return',
         vnp_Locale: VnpLocale.VN,
-        vnp_CreateDate: dateFormat(new Date()),
+        vnp_CreateDate: dateFormat(now),
         vnp_ExpireDate: dateFormat(expireTime),
     });
 
