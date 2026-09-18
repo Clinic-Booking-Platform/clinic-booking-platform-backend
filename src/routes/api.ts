@@ -86,6 +86,17 @@ import {
     getOrderAdminsAPI,
     getOrderDetailAdminAPI,
 } from '../controllers/order/order.api.js';
+import {
+    createMedicalRecordAPI,
+    updateMedicalRecordAPI,
+    signMedicalRecordAPI,
+    getDoctorMedicalRecordsAPI,
+    getDoctorMedicalRecordDetailAPI,
+    getUserMedicalRecordsAPI,
+    getUserMedicalRecordDetailAPI,
+    getAdminMedicalRecordsAPI,
+    getAdminMedicalRecordDetailAPI,
+} from '../controllers/medical-record/medical-record.api.js';
 
 export const authRouter = express.Router();
 export const adminRouter = express.Router();
@@ -174,6 +185,10 @@ userRouter.get('/orders', getOrdersAPI);
 userRouter.get('/orders/:id', getOrderDetailAPI);
 userRouter.delete('/orders/:id', cancelOrderAPI);
 
+//medical-record – Hồ sơ bệnh án của bệnh nhân (chỉ xem)
+userRouter.get('/medical-records', getUserMedicalRecordsAPI);
+userRouter.get('/medical-records/:id', getUserMedicalRecordDetailAPI);
+
 
 
 // ============================================================
@@ -197,6 +212,13 @@ doctorRouter.get('/appointments', getDoctorAppointmentsAPI);
 doctorRouter.get('/appointments/:id', getDoctorAppointmentDetailAPI);
 doctorRouter.delete('/appointments/:id', cancelDoctorAppointmentAPI);
 doctorRouter.put('/appointments/:id/status', updateDoctorAppointmentStatusAPI);
+
+// medical-record – Quản lý hồ sơ bệnh án (tạo, sửa, ký đóng, xem)
+doctorRouter.get('/medical-records', getDoctorMedicalRecordsAPI);
+doctorRouter.get('/medical-records/:id', getDoctorMedicalRecordDetailAPI);
+doctorRouter.post('/medical-records', createMedicalRecordAPI);
+doctorRouter.put('/medical-records/:id', updateMedicalRecordAPI);
+doctorRouter.put('/medical-records/:id/sign', signMedicalRecordAPI);
 
 // ============================================================
 // ADMIN ROUTES (Dành riêng cho Quản trị viên)
@@ -269,3 +291,7 @@ adminRouter.get('/appointments', getAdminAppointmentsAPI);
 adminRouter.get('/appointments/:id', getAdminAppointmentDetailAPI);
 adminRouter.delete('/appointments/:id', cancelAdminAppointmentAPI);
 adminRouter.put('/appointments/:id/status', updateAdminAppointmentStatusAPI);
+
+//medical-record – Hồ sơ bệnh án (chỉ xem, read-only)
+adminRouter.get('/medical-records', getAdminMedicalRecordsAPI);
+adminRouter.get('/medical-records/:id', getAdminMedicalRecordDetailAPI);

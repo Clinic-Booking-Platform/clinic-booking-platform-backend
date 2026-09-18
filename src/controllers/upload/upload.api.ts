@@ -15,7 +15,7 @@ export const uploadSingleFile = async (req: Request, res: Response) => {
             });
         }
 
-        const fileUrl = `/images/${file.filename}`;
+        const fileUrl = file.path;;
 
         return res.status(200).json({
             status: 'success',
@@ -53,7 +53,7 @@ export const uploadMultipleFiles = async (req: Request, res: Response) => {
         }
 
         const uploadedList = files.map((file, index) => ({
-            url: `/images/${file.filename}`,
+            url: file.path,
             filename: file.filename,
             originalName: file.originalname,
             mimetype: file.mimetype,

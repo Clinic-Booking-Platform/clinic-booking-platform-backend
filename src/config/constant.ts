@@ -38,6 +38,13 @@ export const PaymentMethod = {
 
 export type PaymentMethodType = (typeof PaymentMethod)[keyof typeof PaymentMethod];
 
+export const MedicalRecordStatus = {
+    DRAFT: 'DRAFT',
+    SIGNED: 'SIGNED',
+} as const;
+
+export type MedicalRecordStatusType = (typeof MedicalRecordStatus)[keyof typeof MedicalRecordStatus];
+
 
 /**
  * Định nghĩa và quy đổi các ca khám (Time Type)

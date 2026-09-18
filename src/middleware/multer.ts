@@ -3,23 +3,25 @@ import path from 'path';
 import fs from 'fs';
 import { v4 } from 'uuid';
 import { Request, Response, NextFunction } from 'express';
-
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../config/cloudinary.js';
 // Cấu hình chung cho Multer
 const createMulter = (dir: string = 'images') => {
-    const uploadDir = path.join(process.cwd(), 'src/public', dir);
-    if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    const storage = new CloudinaryStorage({
+        cloudinary: cloudinary,
+        params: async (req, file) => {
+            // Lấy tên gốc của file (bỏ đuôi .png/.jpg đi)
+            const nameWithoutExt = path.parse(file.originalname).name;
+            return {
+                folder: `clinic_booking/${dir}`, // Tạo thư mục trên Cloudinary: clinic_booking/images
+                allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'jfif'],
+                public_id: `${Date.now()}-${v4().slice(0, 8)}-${nameWithoutExt}`,
+            };
+        },
+    });
 
     return multer({
-        storage: multer.diskStorage({
-            destination: (req, file, cb) => {
-                cb(null, uploadDir);
-            },
-            filename: (req, file, cb) => {
-                cb(null, v4() + path.extname(file.originalname));
-            },
-        }),
+        storage: storage,
         limits: {
             fileSize: 1024 * 1024 * 5, // Tối đa 5MB
         },
