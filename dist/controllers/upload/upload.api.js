@@ -14,7 +14,8 @@ const uploadSingleFile = async (req, res) => {
                 message: 'Vui lòng chọn file ảnh để tải lên (field: "file")',
             });
         }
-        const fileUrl = `/images/${file.filename}`;
+        const fileUrl = file.path;
+        ;
         return res.status(200).json({
             status: 'success',
             message: 'Tải ảnh lên thành công',
@@ -50,7 +51,7 @@ const uploadMultipleFiles = async (req, res) => {
             });
         }
         const uploadedList = files.map((file, index) => ({
-            url: `/images/${file.filename}`,
+            url: file.path,
             filename: file.filename,
             originalName: file.originalname,
             mimetype: file.mimetype,

@@ -97,6 +97,14 @@ import {
     getAdminMedicalRecordsAPI,
     getAdminMedicalRecordDetailAPI,
 } from '../controllers/medical-record/medical-record.api.js';
+import {
+    getUserPrescriptionAPI,
+    getDoctorPrescriptionAPI,
+    getAdminPrescriptionAPI,
+    createPrescriptionAPI,
+    updatePrescriptionAPI,
+    deletePrescriptionItemAPI,
+} from '../controllers/prescription/prescription.api.js';
 
 export const authRouter = express.Router();
 export const adminRouter = express.Router();
@@ -189,6 +197,9 @@ userRouter.delete('/orders/:id', cancelOrderAPI);
 userRouter.get('/medical-records', getUserMedicalRecordsAPI);
 userRouter.get('/medical-records/:id', getUserMedicalRecordDetailAPI);
 
+//prescription – Đơn thuốc của bệnh nhân (theo hồ sơ bệnh án)
+userRouter.get('/prescriptions/medical-record/:medicalRecordId', getUserPrescriptionAPI);
+
 
 
 // ============================================================
@@ -219,6 +230,12 @@ doctorRouter.get('/medical-records/:id', getDoctorMedicalRecordDetailAPI);
 doctorRouter.post('/medical-records', createMedicalRecordAPI);
 doctorRouter.put('/medical-records/:id', updateMedicalRecordAPI);
 doctorRouter.put('/medical-records/:id/sign', signMedicalRecordAPI);
+
+// prescription – Quản lý đơn thuốc (kê đơn, sửa, xóa, xem)
+doctorRouter.get('/prescriptions/medical-record/:medicalRecordId', getDoctorPrescriptionAPI);
+doctorRouter.post('/prescriptions/medical-record/:medicalRecordId', createPrescriptionAPI);
+doctorRouter.put('/prescriptions/medical-record/:medicalRecordId', updatePrescriptionAPI);
+doctorRouter.delete('/prescriptions/:itemId', deletePrescriptionItemAPI);
 
 // ============================================================
 // ADMIN ROUTES (Dành riêng cho Quản trị viên)
@@ -295,3 +312,6 @@ adminRouter.put('/appointments/:id/status', updateAdminAppointmentStatusAPI);
 //medical-record – Hồ sơ bệnh án (chỉ xem, read-only)
 adminRouter.get('/medical-records', getAdminMedicalRecordsAPI);
 adminRouter.get('/medical-records/:id', getAdminMedicalRecordDetailAPI);
+
+//prescription – Đơn thuốc (chỉ xem, read-only)
+adminRouter.get('/prescriptions/medical-record/:medicalRecordId', getAdminPrescriptionAPI);

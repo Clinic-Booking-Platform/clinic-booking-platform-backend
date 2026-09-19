@@ -1,12 +1,49 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parsePriceRanges = exports.pageSize = exports.RoleType = void 0;
+exports.parsePriceRanges = exports.ORDER_PAYMENT_TIMEOUT_MINUTES = exports.pageSize = exports.TimeTypeMap = exports.MedicalRecordStatus = exports.PaymentMethod = exports.PaymentStatus = exports.ScheduleStatus = exports.AppointmentStatus = exports.RoleType = void 0;
 exports.RoleType = {
     ADMIN: 'ADMIN',
     USER: 'USER',
     DOCTOR: 'DOCTOR',
 };
+exports.AppointmentStatus = {
+    PENDING: 'PENDING',
+    CONFIRMED: 'CONFIRMED',
+    COMPLETED: 'COMPLETED',
+    CANCELLED: 'CANCELLED',
+    NO_SHOW: 'NO_SHOW',
+};
+exports.ScheduleStatus = {
+    AVAILABLE: 'AVAILABLE',
+    FULL: 'FULL',
+    CANCELLED: 'CANCELLED',
+};
+exports.PaymentStatus = {
+    UNPAID: 'UNPAID',
+    PAID: 'PAID',
+    FAILED: 'FAILED',
+    CANCELLED: 'CANCELLED',
+};
+exports.PaymentMethod = {
+    VNPAY: 'VNPAY',
+    CASH: 'CASH',
+};
+exports.MedicalRecordStatus = {
+    DRAFT: 'DRAFT',
+    SIGNED: 'SIGNED',
+};
+exports.TimeTypeMap = {
+    T1: { key: 'T1', label: '08:00 - 09:00', startTime: '08:00', endTime: '09:00' },
+    T2: { key: 'T2', label: '09:00 - 10:00', startTime: '09:00', endTime: '10:00' },
+    T3: { key: 'T3', label: '10:00 - 11:00', startTime: '10:00', endTime: '11:00' },
+    T4: { key: 'T4', label: '11:00 - 12:00', startTime: '11:00', endTime: '12:00' },
+    T5: { key: 'T5', label: '13:00 - 14:00', startTime: '13:00', endTime: '14:00' },
+    T6: { key: 'T6', label: '14:00 - 15:00', startTime: '14:00', endTime: '15:00' },
+    T7: { key: 'T7', label: '15:00 - 16:00', startTime: '15:00', endTime: '16:00' },
+    T8: { key: 'T8', label: '16:00 - 17:00', startTime: '16:00', endTime: '17:00' },
+};
 exports.pageSize = 5;
+exports.ORDER_PAYMENT_TIMEOUT_MINUTES = 15;
 /**
  * Phân tích chuỗi hoặc mảng khoảng giá, ví dụ:
  * - '100-300' ➔ { min: 100000, max: 300000 }

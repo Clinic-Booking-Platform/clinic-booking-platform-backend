@@ -105,6 +105,29 @@ const articleSeedData = [
         html_content: index_js_1.articleJointHtml,
     },
 ];
+const bannerSeedData = [
+    {
+        title: "Ưu đãi gói khám sức khỏe tổng quát đầu năm",
+        image_url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+        link_url: "/packages",
+        sort_order: 1,
+        is_active: true,
+    },
+    {
+        title: "Đội ngũ chuyên gia bác sĩ hàng đầu tại phòng khám",
+        image_url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1200&q=80",
+        link_url: "/doctors",
+        sort_order: 2,
+        is_active: true,
+    },
+    {
+        title: "Tầm soát ung thư sớm - Bảo vệ sức khỏe gia đình bạn",
+        image_url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
+        link_url: "/packages",
+        sort_order: 3,
+        is_active: true,
+    },
+];
 const initialData = async () => {
     const users = await client_js_1.prisma.user.count();
     const role = await client_js_1.prisma.role.count();
@@ -114,6 +137,7 @@ const initialData = async () => {
     const packageDetail = await client_js_1.prisma.packageDetail.count();
     const article = await client_js_1.prisma.article.count();
     const articleDetail = await client_js_1.prisma.articleDetail.count();
+    const banner = await client_js_1.prisma.banner.count();
     if (!role) {
         await client_js_1.prisma.role.createMany({
             data: [
@@ -361,6 +385,13 @@ const initialData = async () => {
         }
         console.log(">>> ARTICLE DETAILS INITIALIZED FOR EXISTING ARTICLES...");
     }
+    // Banners
+    if (!banner) {
+        await client_js_1.prisma.banner.createMany({
+            data: bannerSeedData,
+        });
+        console.log(">>> BANNERS INITIALIZED...");
+    }
     if (role !== 0 &&
         users !== 0 &&
         specialty !== 0 &&
@@ -368,7 +399,8 @@ const initialData = async () => {
         packages !== 0 &&
         packageDetail !== 0 &&
         article !== 0 &&
-        articleDetail !== 0) {
+        articleDetail !== 0 &&
+        banner !== 0) {
         console.log(">>> ALREADY INIT DATA...");
     }
 };

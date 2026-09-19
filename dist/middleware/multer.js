@@ -6,23 +6,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadMultipleMiddleware = exports.uploadSingleMiddleware = void 0;
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
 const uuid_1 = require("uuid");
+const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
+const cloudinary_js_1 = __importDefault(require("../config/cloudinary.js"));
 // Cấu hình chung cho Multer
 const createMulter = (dir = 'images') => {
-    const uploadDir = path_1.default.join(process.cwd(), 'src/public', dir);
-    if (!fs_1.default.existsSync(uploadDir)) {
-        fs_1.default.mkdirSync(uploadDir, { recursive: true });
-    }
+    const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
+        cloudinary: cloudinary_js_1.default,
+        params: async (req, file) => {
+            // Lấy tên gốc của file (bỏ đuôi .png/.jpg đi)
+            const nameWithoutExt = path_1.default.parse(file.originalname).name;
+            return {
+                folder: `clinic_booking/${dir}`, // Tạo thư mục trên Cloudinary: clinic_booking/images
+                allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'jfif'],
+                public_id: `${Date.now()}-${(0, uuid_1.v4)().slice(0, 8)}-${nameWithoutExt}`,
+            };
+        },
+    });
     return (0, multer_1.default)({
-        storage: multer_1.default.diskStorage({
-            destination: (req, file, cb) => {
-                cb(null, uploadDir);
-            },
-            filename: (req, file, cb) => {
-                cb(null, (0, uuid_1.v4)() + path_1.default.extname(file.originalname));
-            },
-        }),
+        storage: storage,
         limits: {
             fileSize: 1024 * 1024 * 5, // Tối đa 5MB
         },
