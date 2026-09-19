@@ -1,5 +1,4 @@
 import express, { Application, Request, Response } from 'express';
-import './types/express.d.ts';
 import path from 'path';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
@@ -37,7 +36,9 @@ const limiter = rateLimit({
     legacyHeaders: false, // Tắt header cũ `X-RateLimit-*`
 });
 
-initialData();
+initialData().catch((err) => {
+    console.warn('⚠️ Seed data skipped or table not created yet:', err.message);
+});
 app.use(limiter);
 app.use('/', authRouter);
 app.use('/admin', adminRouter);

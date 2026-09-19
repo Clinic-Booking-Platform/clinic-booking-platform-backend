@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-require("./types/express.d.ts");
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
@@ -36,7 +35,9 @@ const limiter = (0, express_rate_limit_1.default)({
     standardHeaders: true, // Trả về thông tin giới hạn trong header `RateLimit-*`
     legacyHeaders: false, // Tắt header cũ `X-RateLimit-*`
 });
-(0, Seed_js_1.initialData)();
+(0, Seed_js_1.initialData)().catch((err) => {
+    console.warn('⚠️ Seed data skipped or table not created yet:', err.message);
+});
 app.use(limiter);
 app.use('/', api_js_1.authRouter);
 app.use('/admin', api_js_1.adminRouter);

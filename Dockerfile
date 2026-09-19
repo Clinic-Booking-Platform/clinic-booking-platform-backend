@@ -57,4 +57,5 @@ COPY src/public ./src/public
 
 EXPOSE 8080
 
-CMD ["node", "dist/main.js"]
+# Tự động đẩy schema vào database và khởi chạy server
+CMD ["sh", "-c", "npx prisma db push && node dist/main.js"]
