@@ -52,8 +52,9 @@ RUN npx prisma generate
 # Lấy mã JavaScript đã biên dịch từ Stage 1
 COPY --from=builder /app/dist ./dist
 
-# Copy thư mục static assets (ảnh, uploads)
+# Copy thư mục static assets (ảnh, uploads) và tài liệu Swagger
 COPY src/public ./src/public
+COPY src/swagger ./src/swagger
 
 EXPOSE 8080
 

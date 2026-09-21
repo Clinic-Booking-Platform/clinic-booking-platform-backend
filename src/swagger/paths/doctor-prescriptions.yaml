@@ -1,0 +1,169 @@
+paths:
+  /doctor/prescriptions/medical-record/{medicalRecordId}:
+    get:
+      tags:
+        - "5. Doctor - Prescriptions"
+      summary: "View prescription by medical record"
+      description: "Xem đơn thuốc thuộc một bệnh án."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: medicalRecordId
+          required: true
+          schema:
+            type: integer
+          description: "ID bệnh án (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Lấy đơn thuốc thành công"
+                data:
+                  - id: 1
+                    medical_record_id: 10
+                    medicine_name: "Paracetamol 500mg"
+                    dosage: "2 viên/ngày"
+                    quantity: 10
+                    unit: "Viên"
+                    instructions: "Uống sau ăn no"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+    post:
+      tags:
+        - "5. Doctor - Prescriptions"
+      summary: "Create prescription items"
+      description: "Kê đơn thuốc cho bệnh án đang ở trạng thái DRAFT."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: medicalRecordId
+          required: true
+          schema:
+            type: integer
+          description: "ID bệnh án (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePrescriptionRequest"
+            example:
+              items:
+                - medicine_name: "Amoxicillin 500mg"
+                  dosage: "2 viên/ngày chia 2 lần"
+                  quantity: 20
+                  unit: "Viên"
+                  instructions: "Uống sau ăn 30 phút"
+                - medicine_name: "Paracetamol 500mg"
+                  dosage: "1 viên khi sốt > 38.5 độ"
+                  quantity: 10
+                  unit: "Viên"
+                  instructions: "Cách nhau ít nhất 4 tiếng"
+      responses:
+        '201':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Kê đơn thuốc thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+    put:
+      tags:
+        - "5. Doctor - Prescriptions"
+      summary: "Update entire prescription"
+      description: "Cập nhật toàn bộ đơn thuốc (xóa các mục cũ và thêm mục mới). Bệnh án phải đang ở trạng thái DRAFT."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: medicalRecordId
+          required: true
+          schema:
+            type: integer
+          description: "ID bệnh án (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrescriptionRequest"
+            example:
+              items:
+                - medicine_name: "Augmentin 1g"
+                  dosage: "2 viên/ngày"
+                  quantity: 14
+                  unit: "Viên"
+                  instructions: "Sáng 1 viên, tối 1 viên sau ăn"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Cập nhật đơn thuốc thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+
+  /doctor/prescriptions/{itemId}:
+    delete:
+      tags:
+        - "5. Doctor - Prescriptions"
+      summary: "Delete single prescription item"
+      description: "Xóa 1 mục thuốc trong đơn. Bệnh án chứa thuốc phải đang ở trạng thái DRAFT."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: integer
+          description: "ID mục thuốc (PrescriptionItem ID) (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/SuccessMessage"
+              example:
+                status: "success"
+                message: "Xóa thuốc thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"

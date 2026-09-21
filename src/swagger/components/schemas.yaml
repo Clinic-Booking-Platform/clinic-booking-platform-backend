@@ -1,0 +1,1392 @@
+# ============================================================
+# SHARED SCHEMAS – Dùng chung cho tất cả path files
+# ============================================================
+components:
+  schemas:
+    # ── ENUMS ──
+    RoleType:
+      type: string
+      enum: [ADMIN, DOCTOR, USER]
+      description: "Loại vai trò trong hệ thống"
+
+    AppointmentStatus:
+      type: string
+      enum: [PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+      description: |
+        Trạng thái lịch hẹn:
+        - PENDING: Chờ xác nhận
+        - CONFIRMED: Đã xác nhận
+        - COMPLETED: Đã hoàn thành
+        - CANCELLED: Đã hủy
+        - NO_SHOW: Không đến khám
+
+    ScheduleStatus:
+      type: string
+      enum: [AVAILABLE, FULL, CANCELLED]
+      description: |
+        Trạng thái ca làm việc:
+        - AVAILABLE: Còn chỗ
+        - FULL: Đã đầy
+        - CANCELLED: Đã hủy
+
+    PaymentStatus:
+      type: string
+      enum: [UNPAID, PAID, FAILED, CANCELLED]
+      description: |
+        Trạng thái thanh toán:
+        - UNPAID: Chưa thanh toán
+        - PAID: Đã thanh toán
+        - FAILED: Thanh toán thất bại
+        - CANCELLED: Đã hủy
+
+    PaymentMethod:
+      type: string
+      enum: [VNPAY, CASH]
+      description: "Phương thức thanh toán"
+
+    MedicalRecordStatus:
+      type: string
+      enum: [DRAFT, SIGNED]
+      description: |
+        Trạng thái hồ sơ bệnh án:
+        - DRAFT: Bản nháp (có thể chỉnh sửa)
+        - SIGNED: Đã ký (khóa vĩnh viễn)
+
+    TimeType:
+      type: string
+      enum: [T1, T2, T3, T4, T5, T6, T7, T8]
+      description: |
+        Ca khám trong ngày:
+        - T1: 08:00 - 09:00
+        - T2: 09:00 - 10:00
+        - T3: 10:00 - 11:00
+        - T4: 11:00 - 12:00
+        - T5: 13:00 - 14:00
+        - T6: 14:00 - 15:00
+        - T7: 15:00 - 16:00
+        - T8: 16:00 - 17:00
+
+    AppointmentType:
+      type: string
+      enum: [OFFLINE, ONLINE]
+      description: "Loại hình khám: OFFLINE (trực tiếp), ONLINE (trực tuyến)"
+
+    # ── RESPONSE MODELS ──
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        full_name:
+          type: string
+          example: "Nguyễn Văn A"
+        phone_number:
+          type: string
+          nullable: true
+          example: "0901234567"
+        email:
+          type: string
+          format: email
+          example: "user@gmail.com"
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+          example: "1990-05-15"
+        gender:
+          type: string
+          nullable: true
+          example: "Nam"
+        avatar:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/xxx/image/upload/avatar.jpg"
+        roleId:
+          type: integer
+          nullable: true
+          example: 2
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        role:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+              example: 2
+            name:
+              type: string
+              example: "USER"
+
+    Doctor:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 3
+        specialty_id:
+          type: integer
+          example: 1
+        description:
+          type: string
+          nullable: true
+          example: "Bác sĩ chuyên khoa Nội tổng hợp, 10 năm kinh nghiệm"
+        price:
+          type: string
+          example: "200000.00"
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        user:
+          $ref: "#/components/schemas/User"
+        specialty:
+          $ref: "#/components/schemas/Specialty"
+
+    Specialty:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Nội tổng hợp"
+        description:
+          type: string
+          nullable: true
+          example: "Chuyên khoa khám và điều trị các bệnh nội khoa"
+        image_url:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/xxx/image/upload/specialty.jpg"
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    Schedule:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        doctor_id:
+          type: integer
+          example: 1
+        date:
+          type: string
+          format: date
+          example: "2026-09-25"
+        time_type:
+          type: string
+          example: "T1"
+        max_number:
+          type: integer
+          example: 10
+        status:
+          type: string
+          example: "AVAILABLE"
+        doctor:
+          $ref: "#/components/schemas/Doctor"
+
+    Package:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Gói khám tổng quát cơ bản"
+        description:
+          type: string
+          nullable: true
+          example: "Gói khám sức khỏe tổng quát bao gồm xét nghiệm máu, siêu âm"
+        thumbnail_url:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/xxx/image/upload/package.jpg"
+        price:
+          type: string
+          example: "500000.00"
+        discount_price:
+          type: string
+          nullable: true
+          example: "450000.00"
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        package_detail:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+              example: 1
+            html_content:
+              type: string
+              example: "<h2>Chi tiết gói khám</h2><p>Bao gồm...</p>"
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 2
+        doctor_id:
+          type: integer
+          nullable: true
+          example: 1
+        package_id:
+          type: integer
+          nullable: true
+          example: null
+        order_id:
+          type: integer
+          nullable: true
+          example: null
+        appointment_type:
+          type: string
+          example: "OFFLINE"
+        meeting_link:
+          type: string
+          nullable: true
+          example: null
+        date:
+          type: string
+          format: date
+          example: "2026-09-25"
+        time_type:
+          type: string
+          example: "T1"
+        patient_name:
+          type: string
+          example: "Nguyễn Văn A"
+        patient_phone:
+          type: string
+          example: "0901234567"
+        symptoms:
+          type: string
+          nullable: true
+          example: "Đau đầu, sốt nhẹ"
+        status:
+          type: string
+          example: "PENDING"
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        author_id:
+          type: integer
+          example: 1
+        specialty_id:
+          type: integer
+          nullable: true
+          example: 1
+        title:
+          type: string
+          example: "Phòng ngừa bệnh tim mạch"
+        slug:
+          type: string
+          example: "phong-ngua-benh-tim-mach"
+        thumbnail_url:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/xxx/image/upload/article.jpg"
+        short_description:
+          type: string
+          nullable: true
+          example: "Hướng dẫn phòng ngừa các bệnh tim mạch thường gặp"
+        views:
+          type: integer
+          example: 150
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-20T10:30:00.000Z"
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 2
+        sum:
+          type: integer
+          example: 3
+        cart_details:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartDetail"
+
+    CartDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        cart_id:
+          type: integer
+          example: 1
+        package_id:
+          type: integer
+          example: 1
+        quantity:
+          type: integer
+          example: 2
+        price:
+          type: string
+          example: "500000.00"
+        package:
+          $ref: "#/components/schemas/Package"
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 2
+        order_code:
+          type: string
+          example: "ORD-20260921-001"
+        total_price:
+          type: string
+          example: "1500000.00"
+        payment_method:
+          type: string
+          example: "VNPAY"
+        payment_status:
+          type: string
+          example: "PAID"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-21T10:30:00.000Z"
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    OrderDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        order_id:
+          type: integer
+          example: 1
+        package_id:
+          type: integer
+          example: 1
+        quantity:
+          type: integer
+          example: 2
+        price:
+          type: string
+          example: "500000.00"
+
+    Banner:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Khuyến mãi khám tổng quát"
+        image_url:
+          type: string
+          example: "https://res.cloudinary.com/xxx/image/upload/banner.jpg"
+        link_url:
+          type: string
+          nullable: true
+          example: "https://phongkham.vn/khuyen-mai"
+        sort_order:
+          type: integer
+          example: 1
+        is_active:
+          type: boolean
+          example: true
+
+    MedicalRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        appointment_id:
+          type: integer
+          example: 1
+        record_code:
+          type: string
+          example: "BA20260914-001"
+        symptoms:
+          type: string
+          nullable: true
+          example: "Đau đầu, sốt nhẹ"
+        clinical_examination:
+          type: string
+          nullable: true
+          example: "Bệnh nhân tỉnh, tiếp xúc tốt"
+        diagnosis:
+          type: string
+          example: "Viêm họng cấp"
+        icd10_code:
+          type: string
+          nullable: true
+          example: "J02"
+        icd10_name:
+          type: string
+          nullable: true
+          example: "Viêm họng cấp"
+        blood_pressure:
+          type: string
+          nullable: true
+          example: "120/80"
+        pulse:
+          type: integer
+          nullable: true
+          example: 75
+        temperature:
+          type: string
+          nullable: true
+          example: "37.5"
+        weight:
+          type: string
+          nullable: true
+          example: "65.00"
+        height:
+          type: string
+          nullable: true
+          example: "170.00"
+        doctor_advice:
+          type: string
+          nullable: true
+          example: "Nghỉ ngơi, uống nhiều nước, tái khám sau 5 ngày"
+        re_examination_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-09-30"
+        consultation_type:
+          type: string
+          example: "OFFLINE"
+        recommendation:
+          type: string
+          nullable: true
+          example: "Nên xét nghiệm máu nếu triệu chứng kéo dài"
+        status:
+          type: string
+          example: "DRAFT"
+        signed_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-21T10:00:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-09-21T10:00:00.000Z"
+
+    PrescriptionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        medical_record_id:
+          type: integer
+          example: 1
+        medicine_name:
+          type: string
+          example: "Paracetamol 500mg"
+        dosage:
+          type: string
+          example: "1 viên x 3 lần/ngày"
+        quantity:
+          type: integer
+          example: 9
+        unit:
+          type: string
+          example: "viên"
+        instructions:
+          type: string
+          nullable: true
+          example: "Uống sau ăn"
+
+    MedicalRecordAttachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        medical_record_id:
+          type: integer
+          example: 1
+        file_url:
+          type: string
+          example: "https://res.cloudinary.com/xxx/image/upload/xetnghiem.pdf"
+        file_name:
+          type: string
+          example: "ket-qua-xet-nghiem-mau.pdf"
+        description:
+          type: string
+          nullable: true
+          example: "Kết quả xét nghiệm máu tổng phân tích"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-21T10:00:00.000Z"
+
+    Bank:
+      type: object
+      properties:
+        bank_code:
+          type: string
+          example: "NCB"
+        bank_name:
+          type: string
+          example: "Ngân hàng NCB"
+        logo_link:
+          type: string
+          example: "https://sandbox.vnpayment.vn/paymentv2/images/NCB.png"
+        bank_type:
+          type: integer
+          example: 0
+        display_order:
+          type: integer
+          example: 0
+
+    # ── REQUEST SCHEMAS ──
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          description: "Email đăng nhập (Bắt buộc)"
+          example: "user@gmail.com"
+        password:
+          type: string
+          description: "Mật khẩu (Bắt buộc)"
+          example: "123456"
+
+    RegisterRequest:
+      type: object
+      required: [fullname, email, password, confirmPassword]
+      properties:
+        fullname:
+          type: string
+          description: "Họ tên đầy đủ (Bắt buộc)"
+          example: "Nguyễn Văn A"
+        email:
+          type: string
+          format: email
+          description: "Email đăng ký (Bắt buộc, không trùng)"
+          example: "newuser@gmail.com"
+        password:
+          type: string
+          description: "Mật khẩu (Bắt buộc)"
+          example: "123456"
+        confirmPassword:
+          type: string
+          description: "Xác nhận mật khẩu (Bắt buộc, phải trùng password)"
+          example: "123456"
+
+    RegisterDoctorRequest:
+      type: object
+      required: [fullname, email, password, specialty_id, price]
+      properties:
+        fullname:
+          type: string
+          description: "Họ tên bác sĩ (Bắt buộc)"
+          example: "BS. Trần Văn B"
+        email:
+          type: string
+          format: email
+          description: "Email đăng nhập cho bác sĩ (Bắt buộc)"
+          example: "bacsi@phongkham.vn"
+        password:
+          type: string
+          description: "Mật khẩu (Bắt buộc)"
+          example: "123456"
+        confirmPassword:
+          type: string
+          description: "Xác nhận mật khẩu (Tùy chọn)"
+          example: "123456"
+        specialty_id:
+          type: integer
+          description: "ID chuyên khoa (Bắt buộc)"
+          example: 1
+        price:
+          type: number
+          description: "Giá khám (Bắt buộc)"
+          example: 200000
+
+    CreateAppointmentRequest:
+      type: object
+      required: [doctor_id, date, time_type, patient_name, patient_phone]
+      properties:
+        doctor_id:
+          type: integer
+          description: "ID bác sĩ (Bắt buộc)"
+          example: 1
+        date:
+          type: string
+          format: date
+          description: "Ngày khám, format YYYY-MM-DD (Bắt buộc)"
+          example: "2026-09-25"
+        time_type:
+          type: string
+          enum: [T1, T2, T3, T4, T5, T6, T7, T8]
+          description: |
+            Ca khám (Bắt buộc):
+            T1: 08:00-09:00, T2: 09:00-10:00, T3: 10:00-11:00, T4: 11:00-12:00
+            T5: 13:00-14:00, T6: 14:00-15:00, T7: 15:00-16:00, T8: 16:00-17:00
+          example: "T1"
+        patient_name:
+          type: string
+          description: "Tên bệnh nhân (Bắt buộc)"
+          example: "Nguyễn Văn A"
+        patient_phone:
+          type: string
+          description: "SĐT bệnh nhân (Bắt buộc)"
+          example: "0901234567"
+        symptoms:
+          type: string
+          nullable: true
+          description: "Triệu chứng / lý do khám (Tùy chọn)"
+          example: "Đau đầu, sốt nhẹ 2 ngày"
+
+    BookFromOrderRequest:
+      type: object
+      required: [doctor_id, date, time_type, patient_name, patient_phone]
+      properties:
+        doctor_id:
+          type: integer
+          description: "ID bác sĩ (Bắt buộc)"
+          example: 1
+        date:
+          type: string
+          format: date
+          description: "Ngày khám (Bắt buộc)"
+          example: "2026-09-25"
+        time_type:
+          type: string
+          enum: [T1, T2, T3, T4, T5, T6, T7, T8]
+          description: "Ca khám (Bắt buộc)"
+          example: "T2"
+        patient_name:
+          type: string
+          description: "Tên bệnh nhân (Bắt buộc)"
+          example: "Nguyễn Văn A"
+        patient_phone:
+          type: string
+          description: "SĐT bệnh nhân (Bắt buộc)"
+          example: "0901234567"
+        symptoms:
+          type: string
+          nullable: true
+          description: "Triệu chứng (Tùy chọn)"
+          example: "Ho kéo dài"
+
+    CreateScheduleRequest:
+      type: object
+      required: [date, time_type]
+      properties:
+        doctor_id:
+          type: integer
+          description: "ID bác sĩ (Bắt buộc khi Admin tạo, Doctor tự động lấy từ token)"
+          example: 1
+        date:
+          type: string
+          format: date
+          description: "Ngày làm việc (Bắt buộc)"
+          example: "2026-09-25"
+        time_type:
+          type: string
+          enum: [T1, T2, T3, T4, T5, T6, T7, T8]
+          description: "Ca làm việc (Bắt buộc)"
+          example: "T1"
+        max_number:
+          type: integer
+          description: "Số bệnh nhân tối đa (Tùy chọn, mặc định = 10)"
+          example: 10
+
+    BulkCreateScheduleRequest:
+      type: object
+      required: [date, time_types]
+      properties:
+        doctor_id:
+          type: integer
+          description: "ID bác sĩ (Bắt buộc khi Admin tạo)"
+          example: 1
+        date:
+          type: string
+          format: date
+          description: "Ngày làm việc (Bắt buộc)"
+          example: "2026-09-25"
+        time_types:
+          type: array
+          items:
+            type: string
+            enum: [T1, T2, T3, T4, T5, T6, T7, T8]
+          description: "Danh sách ca làm việc (Bắt buộc)"
+          example: ["T1", "T2", "T3", "T5", "T6"]
+        max_number:
+          type: integer
+          description: "Số bệnh nhân tối đa mỗi ca (Tùy chọn, mặc định = 10)"
+          example: 10
+
+    UpdateScheduleRequest:
+      type: object
+      properties:
+        max_number:
+          type: integer
+          description: "Số bệnh nhân tối đa (Tùy chọn)"
+          example: 15
+        status:
+          type: string
+          enum: [AVAILABLE, FULL, CANCELLED]
+          description: "Trạng thái ca làm việc (Tùy chọn)"
+          example: "CANCELLED"
+
+    CreateArticleRequest:
+      type: object
+      required: [title, html_content]
+      properties:
+        title:
+          type: string
+          description: "Tiêu đề bài viết (Bắt buộc)"
+          example: "Phòng ngừa bệnh tim mạch hiệu quả"
+        thumbnail_url:
+          type: string
+          nullable: true
+          description: "Ảnh đại diện bài viết (Tùy chọn)"
+          example: "https://res.cloudinary.com/xxx/image/upload/article.jpg"
+        short_description:
+          type: string
+          nullable: true
+          description: "Mô tả ngắn (Tùy chọn)"
+          example: "Hướng dẫn phòng ngừa các bệnh tim mạch"
+        html_content:
+          type: string
+          description: "Nội dung HTML chi tiết (Bắt buộc)"
+          example: "<h2>1. Chế độ ăn uống</h2><p>Hạn chế chất béo...</p>"
+        specialty_id:
+          type: integer
+          nullable: true
+          description: "ID chuyên khoa liên quan (Tùy chọn, Doctor tự gán theo chuyên khoa của mình)"
+          example: 1
+        author_id:
+          type: integer
+          description: "ID bác sĩ tác giả (Bắt buộc khi Admin tạo, Doctor tự lấy từ token)"
+          example: 1
+
+    UpdateArticleRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: "Tiêu đề bài viết (Tùy chọn)"
+          example: "Phòng ngừa bệnh tim mạch - Cập nhật mới"
+        thumbnail_url:
+          type: string
+          nullable: true
+          description: "Ảnh đại diện (Tùy chọn)"
+          example: "https://res.cloudinary.com/xxx/image/upload/article-new.jpg"
+        short_description:
+          type: string
+          nullable: true
+          description: "Mô tả ngắn (Tùy chọn)"
+          example: "Cập nhật hướng dẫn mới"
+        html_content:
+          type: string
+          description: "Nội dung HTML (Tùy chọn)"
+          example: "<h2>Nội dung cập nhật</h2>"
+
+    AddToCartRequest:
+      type: object
+      required: [package_id]
+      properties:
+        package_id:
+          type: integer
+          description: "ID gói khám cần thêm (Bắt buộc)"
+          example: 1
+        quantity:
+          type: integer
+          description: "Số lượng (Tùy chọn, mặc định = 1)"
+          example: 1
+
+    UpdateCartQuantityRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          description: "Số lượng mới (Bắt buộc, tối thiểu = 1)"
+          example: 3
+
+    CreateSpecialtyRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: "Tên chuyên khoa (Bắt buộc)"
+          example: "Tim mạch"
+        description:
+          type: string
+          nullable: true
+          description: "Mô tả chuyên khoa (Tùy chọn)"
+          example: "Chuyên khoa khám và điều trị bệnh tim mạch"
+        image_url:
+          type: string
+          nullable: true
+          description: "Ảnh đại diện chuyên khoa (Tùy chọn)"
+          example: "https://res.cloudinary.com/xxx/image/upload/specialty.jpg"
+
+    UpdateSpecialtyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "Tên chuyên khoa (Tùy chọn)"
+          example: "Tim mạch - Cập nhật"
+        description:
+          type: string
+          nullable: true
+          description: "Mô tả (Tùy chọn)"
+          example: "Mô tả mới"
+        image_url:
+          type: string
+          nullable: true
+          description: "Ảnh đại diện (Tùy chọn)"
+          example: "https://res.cloudinary.com/xxx/image/upload/specialty-new.jpg"
+
+    CreatePackageRequest:
+      type: object
+      required: [name, price]
+      properties:
+        name:
+          type: string
+          description: "Tên gói khám (Bắt buộc)"
+          example: "Gói khám tổng quát VIP"
+        description:
+          type: string
+          nullable: true
+          description: "Mô tả ngắn (Tùy chọn)"
+          example: "Gói khám sức khỏe toàn diện VIP"
+        thumbnail_url:
+          type: string
+          nullable: true
+          description: "Ảnh đại diện (Tùy chọn)"
+          example: "https://res.cloudinary.com/xxx/image/upload/package.jpg"
+        price:
+          type: number
+          description: "Giá gốc (Bắt buộc)"
+          example: 1500000
+        discount_price:
+          type: number
+          nullable: true
+          description: "Giá khuyến mãi (Tùy chọn, phải nhỏ hơn giá gốc)"
+          example: 1200000
+        html_content:
+          type: string
+          nullable: true
+          description: "Nội dung HTML chi tiết gói khám (Tùy chọn)"
+          example: "<h2>Gói bao gồm</h2><ul><li>Xét nghiệm máu</li></ul>"
+
+    UpdatePackageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "Tên gói khám (Tùy chọn)"
+          example: "Gói khám tổng quát VIP - Cập nhật"
+        description:
+          type: string
+          nullable: true
+          description: "Mô tả (Tùy chọn)"
+        thumbnail_url:
+          type: string
+          nullable: true
+          description: "Ảnh đại diện (Tùy chọn)"
+        price:
+          type: number
+          description: "Giá gốc (Tùy chọn)"
+          example: 1600000
+        discount_price:
+          type: number
+          nullable: true
+          description: "Giá khuyến mãi (Tùy chọn)"
+          example: 1300000
+        html_content:
+          type: string
+          nullable: true
+          description: "Nội dung HTML (Tùy chọn)"
+
+    CreateBannerRequest:
+      type: object
+      required: [title, image_url]
+      properties:
+        title:
+          type: string
+          description: "Tiêu đề banner (Bắt buộc)"
+          example: "Khuyến mãi tháng 9"
+        image_url:
+          type: string
+          description: "URL ảnh banner (Bắt buộc)"
+          example: "https://res.cloudinary.com/xxx/image/upload/banner.jpg"
+        link_url:
+          type: string
+          nullable: true
+          description: "Link khi click vào banner (Tùy chọn)"
+          example: "https://phongkham.vn/khuyen-mai"
+        is_active:
+          type: boolean
+          description: "Trạng thái hiển thị (Tùy chọn, mặc định = true)"
+          example: true
+
+    UpdateBannerRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: "Tiêu đề banner (Tùy chọn)"
+          example: "Banner cập nhật"
+        image_url:
+          type: string
+          description: "URL ảnh (Tùy chọn)"
+        link_url:
+          type: string
+          nullable: true
+          description: "Link click (Tùy chọn)"
+        sort_order:
+          type: integer
+          description: "Thứ tự hiển thị (Tùy chọn)"
+          example: 2
+
+    ChangeBannerStatusRequest:
+      type: object
+      required: [is_active]
+      properties:
+        is_active:
+          type: boolean
+          description: "Trạng thái hiển thị (Bắt buộc)"
+          example: false
+
+    UpdateDoctorRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          description: "Họ tên bác sĩ (Tùy chọn)"
+          example: "BS. Trần Văn B"
+        phone_number:
+          type: string
+          nullable: true
+          description: "Số điện thoại (Tùy chọn)"
+          example: "0909876543"
+        avatar:
+          type: string
+          nullable: true
+          description: "URL ảnh đại diện (Tùy chọn)"
+          example: "https://res.cloudinary.com/xxx/image/upload/doctor.jpg"
+        specialty_id:
+          type: integer
+          description: "ID chuyên khoa (Tùy chọn)"
+          example: 2
+        description:
+          type: string
+          nullable: true
+          description: "Mô tả về bác sĩ (Tùy chọn)"
+          example: "15 năm kinh nghiệm"
+        price:
+          type: number
+          description: "Giá khám (Tùy chọn)"
+          example: 250000
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          description: "Họ tên (Tùy chọn)"
+          example: "Nguyễn Văn A"
+        phone_number:
+          type: string
+          nullable: true
+          description: "Số điện thoại (Tùy chọn)"
+          example: "0901234567"
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+          description: "Ngày sinh (Tùy chọn)"
+          example: "1990-05-15"
+        gender:
+          type: string
+          nullable: true
+          description: "Giới tính (Tùy chọn)"
+          example: "Nam"
+        avatar:
+          type: string
+          nullable: true
+          description: "URL ảnh đại diện (Tùy chọn)"
+          example: "https://res.cloudinary.com/xxx/image/upload/avatar.jpg"
+        specialty_id:
+          type: integer
+          description: "ID chuyên khoa - chỉ áp dụng nếu user là Doctor (Tùy chọn)"
+          example: 1
+        description:
+          type: string
+          nullable: true
+          description: "Mô tả - chỉ áp dụng nếu user là Doctor (Tùy chọn)"
+          example: "Bác sĩ nội khoa"
+        price:
+          type: number
+          description: "Giá khám - chỉ áp dụng nếu user là Doctor (Tùy chọn)"
+          example: 200000
+
+    UpdateAppointmentStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+          description: "Trạng thái mới (Bắt buộc)"
+          example: "CONFIRMED"
+
+    CreateMedicalRecordRequest:
+      type: object
+      required: [appointment_id, diagnosis]
+      properties:
+        appointment_id:
+          type: integer
+          description: "ID lịch hẹn (Bắt buộc, phải có status = CONFIRMED)"
+          example: 15
+        symptoms:
+          type: string
+          nullable: true
+          description: "Triệu chứng (Tùy chọn)"
+          example: "Đau đầu, sốt nhẹ 2 ngày"
+        clinical_examination:
+          type: string
+          nullable: true
+          description: "Khám lâm sàng (Tùy chọn)"
+          example: "Bệnh nhân tỉnh, tiếp xúc tốt, họng đỏ"
+        diagnosis:
+          type: string
+          description: "Chẩn đoán (Bắt buộc)"
+          example: "Viêm họng cấp"
+        icd10_code:
+          type: string
+          nullable: true
+          description: "Mã ICD-10 (Tùy chọn)"
+          example: "J02"
+        icd10_name:
+          type: string
+          nullable: true
+          description: "Tên bệnh theo ICD-10 (Tùy chọn)"
+          example: "Viêm họng cấp"
+        blood_pressure:
+          type: string
+          nullable: true
+          description: "Huyết áp (Tùy chọn)"
+          example: "120/80"
+        pulse:
+          type: integer
+          nullable: true
+          description: "Mạch (lần/phút) (Tùy chọn)"
+          example: 75
+        temperature:
+          type: number
+          nullable: true
+          description: "Nhiệt độ (°C) (Tùy chọn)"
+          example: 37.5
+        weight:
+          type: number
+          nullable: true
+          description: "Cân nặng (kg) (Tùy chọn)"
+          example: 65
+        height:
+          type: number
+          nullable: true
+          description: "Chiều cao (cm) (Tùy chọn)"
+          example: 170
+        doctor_advice:
+          type: string
+          nullable: true
+          description: "Lời dặn bác sĩ (Tùy chọn)"
+          example: "Nghỉ ngơi, uống nhiều nước"
+        re_examination_date:
+          type: string
+          format: date
+          nullable: true
+          description: "Ngày tái khám (Tùy chọn)"
+          example: "2026-09-30"
+        consultation_type:
+          type: string
+          enum: [OFFLINE, ONLINE]
+          description: "Loại hình khám (Tùy chọn, mặc định OFFLINE)"
+          example: "OFFLINE"
+        recommendation:
+          type: string
+          nullable: true
+          description: "Đề xuất / khuyến nghị (Tùy chọn)"
+          example: "Xét nghiệm máu nếu triệu chứng kéo dài"
+        attachments:
+          type: array
+          description: "Danh sách file đính kèm kết quả xét nghiệm (Tùy chọn)"
+          items:
+            type: object
+            required: [file_url, file_name]
+            properties:
+              file_url:
+                type: string
+                description: "URL file (Bắt buộc)"
+                example: "https://res.cloudinary.com/xxx/xetnghiem.pdf"
+              file_name:
+                type: string
+                description: "Tên file (Bắt buộc)"
+                example: "xet-nghiem-mau.pdf"
+              description:
+                type: string
+                nullable: true
+                description: "Mô tả file (Tùy chọn)"
+                example: "Kết quả xét nghiệm máu"
+
+    UpdateMedicalRecordRequest:
+      type: object
+      description: "Cập nhật hồ sơ bệnh án (chỉ khi status = DRAFT). Tất cả field đều tùy chọn."
+      properties:
+        symptoms:
+          type: string
+          nullable: true
+          description: "Triệu chứng (Tùy chọn)"
+        clinical_examination:
+          type: string
+          nullable: true
+          description: "Khám lâm sàng (Tùy chọn)"
+        diagnosis:
+          type: string
+          description: "Chẩn đoán (Tùy chọn)"
+        icd10_code:
+          type: string
+          nullable: true
+          description: "Mã ICD-10 (Tùy chọn)"
+        icd10_name:
+          type: string
+          nullable: true
+          description: "Tên bệnh ICD-10 (Tùy chọn)"
+        blood_pressure:
+          type: string
+          nullable: true
+          description: "Huyết áp (Tùy chọn)"
+        pulse:
+          type: integer
+          nullable: true
+          description: "Mạch (Tùy chọn)"
+        temperature:
+          type: number
+          nullable: true
+          description: "Nhiệt độ (Tùy chọn)"
+        weight:
+          type: number
+          nullable: true
+          description: "Cân nặng (Tùy chọn)"
+        height:
+          type: number
+          nullable: true
+          description: "Chiều cao (Tùy chọn)"
+        doctor_advice:
+          type: string
+          nullable: true
+          description: "Lời dặn (Tùy chọn)"
+        re_examination_date:
+          type: string
+          format: date
+          nullable: true
+          description: "Ngày tái khám (Tùy chọn)"
+        recommendation:
+          type: string
+          nullable: true
+          description: "Đề xuất (Tùy chọn)"
+        attachments:
+          type: array
+          description: "File đính kèm mới (Tùy chọn)"
+          items:
+            type: object
+            properties:
+              file_url:
+                type: string
+              file_name:
+                type: string
+              description:
+                type: string
+                nullable: true
+
+    CreatePrescriptionRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          description: "Danh sách thuốc trong đơn (Bắt buộc)"
+          items:
+            type: object
+            required: [medicine_name, dosage, quantity, unit]
+            properties:
+              medicine_name:
+                type: string
+                description: "Tên thuốc (Bắt buộc)"
+                example: "Paracetamol 500mg"
+              dosage:
+                type: string
+                description: "Liều dùng (Bắt buộc)"
+                example: "1 viên x 3 lần/ngày"
+              quantity:
+                type: integer
+                description: "Số lượng (Bắt buộc)"
+                example: 9
+              unit:
+                type: string
+                description: "Đơn vị (Bắt buộc)"
+                example: "viên"
+              instructions:
+                type: string
+                nullable: true
+                description: "Hướng dẫn sử dụng (Tùy chọn)"
+                example: "Uống sau ăn"
+
+    UpdatePrescriptionRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          description: "Danh sách thuốc mới (thay thế toàn bộ đơn cũ) (Bắt buộc)"
+          items:
+            type: object
+            required: [medicine_name, dosage, quantity, unit]
+            properties:
+              medicine_name:
+                type: string
+                description: "Tên thuốc (Bắt buộc)"
+                example: "Amoxicillin 500mg"
+              dosage:
+                type: string
+                description: "Liều dùng (Bắt buộc)"
+                example: "1 viên x 2 lần/ngày"
+              quantity:
+                type: integer
+                description: "Số lượng (Bắt buộc)"
+                example: 14
+              unit:
+                type: string
+                description: "Đơn vị (Bắt buộc)"
+                example: "viên"
+              instructions:
+                type: string
+                nullable: true
+                description: "Hướng dẫn sử dụng (Tùy chọn)"
+                example: "Uống trước ăn 30 phút"
+
+    UploadSingleResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            url:
+              type: string
+              example: "https://res.cloudinary.com/xxx/image/upload/v123/file.jpg"
+            filename:
+              type: string
+              example: "file_abc123"
+            originalName:
+              type: string
+              example: "avatar.jpg"
+            mimetype:
+              type: string
+              example: "image/jpeg"
+            size:
+              type: integer
+              example: 245000
+
+    UploadMultipleResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                example: "https://res.cloudinary.com/xxx/image/upload/v123/file1.jpg"
+              filename:
+                type: string
+                example: "file_abc123"
+              originalName:
+                type: string
+                example: "photo1.jpg"
+              mimetype:
+                type: string
+                example: "image/jpeg"
+              size:
+                type: integer
+                example: 245000
+              displayOrder:
+                type: integer
+                example: 0

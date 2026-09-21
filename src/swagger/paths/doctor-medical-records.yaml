@@ -1,0 +1,198 @@
+paths:
+  /doctor/medical-records:
+    get:
+      tags:
+        - "5. Doctor - Medical Records"
+      summary: "List medical records I created"
+      description: "Lấy danh sách bệnh án do bác sĩ tạo."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: "Trang hiện tại (Tùy chọn)"
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: "Tìm kiếm theo mã bệnh án, tên bệnh nhân (Tùy chọn)"
+        - in: query
+          name: from_date
+          schema:
+            type: string
+            format: date
+          description: "Từ ngày tạo (Tùy chọn)"
+        - in: query
+          name: to_date
+          schema:
+            type: string
+            format: date
+          description: "Đến ngày tạo (Tùy chọn)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedResponse"
+              example:
+                status: "success"
+                message: "Lấy danh sách bệnh án thành công"
+                data:
+                  items:
+                    - id: 1
+                      record_code: "BA-20240120-001"
+                      patient_id: 5
+                      appointment_id: 10
+                      status: "DRAFT"
+                      diagnosis: "Viêm họng cấp"
+                  totalItems: 1
+                  totalPages: 1
+                  currentPage: 1
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      tags:
+        - "5. Doctor - Medical Records"
+      summary: "Create medical record"
+      description: "Tạo hồ sơ bệnh án cho lịch hẹn (CONFIRMED). Mã tự sinh: BA-YYYYMMDD-xxx. Status ban đầu: DRAFT."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMedicalRecordRequest"
+            example:
+              appointment_id: 10
+              reason_for_visit: "Đau họng, sốt nhẹ"
+              medical_history: "Không có tiền sử bệnh nền"
+              diagnosis: "Viêm họng cấp"
+              treatment_plan: "Uống thuốc đúng giờ, súc miệng nước muối"
+              notes: "Tái khám sau 3 ngày nếu không giảm sốt"
+      responses:
+        '201':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Tạo bệnh án thành công"
+                data:
+                  id: 1
+                  record_code: "BA-20240120-001"
+                  status: "DRAFT"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /doctor/medical-records/{id}:
+    get:
+      tags:
+        - "5. Doctor - Medical Records"
+      summary: "Medical record detail"
+      description: "Xem chi tiết bệnh án."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID bệnh án (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalRecord"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+    put:
+      tags:
+        - "5. Doctor - Medical Records"
+      summary: "Update medical record"
+      description: "Cập nhật hồ sơ bệnh án. Chỉ cập nhật được khi bệnh án đang ở trạng thái DRAFT. Nếu đã SIGNED sẽ trả về lỗi 400."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID bệnh án (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMedicalRecordRequest"
+            example:
+              diagnosis: "Viêm họng cấp có mủ"
+              treatment_plan: "Dùng kháng sinh"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Cập nhật bệnh án thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+
+  /doctor/medical-records/{id}/sign:
+    put:
+      tags:
+        - "5. Doctor - Medical Records"
+      summary: "Sign/lock medical record"
+      description: "Ký và khóa hồ sơ bệnh án (DRAFT -> SIGNED). Sau khi ký, hồ sơ khóa vĩnh viễn và không thể sửa đổi."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID bệnh án (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Ký hồ sơ bệnh án thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"

@@ -1,0 +1,142 @@
+paths:
+  /admin/packages:
+    get:
+      summary: Lấy danh sách gói khám
+      description: Lấy danh sách gói khám.
+      tags:
+        - "4. Admin - Packages"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          description: Trạng thái (Tùy chọn)
+          schema:
+            type: string
+            enum: [all, active, deleted]
+            example: all
+        - $ref: '#/components/parameters/MinPriceParam'
+        - $ref: '#/components/parameters/MaxPriceParam'
+        - $ref: '#/components/parameters/PriceRangeParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+    post:
+      summary: Tạo gói khám
+      description: Tạo gói khám mới.
+      tags:
+        - "4. Admin - Packages"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePackageRequest'
+            example:
+              name: "Gói khám tổng quát"
+              price: 1500000
+              discount_price: 1200000
+              description: "Khám tổng quát cơ bản"
+              thumbnail_url: "https://example.com/thumb.jpg"
+              html_content: "<p>Chi tiết gói khám</p>"
+      responses:
+        '201':
+          description: Tạo thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/packages/{id}:
+    get:
+      summary: Lấy chi tiết gói khám
+      description: Lấy chi tiết gói khám.
+      tags:
+        - "4. Admin - Packages"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Cập nhật gói khám
+      description: Cập nhật thông tin gói khám.
+      tags:
+        - "4. Admin - Packages"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePackageRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      summary: Xóa mềm gói khám
+      description: Xóa mềm gói khám.
+      tags:
+        - "4. Admin - Packages"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /admin/packages-restore/{id}:
+    post:
+      summary: Khôi phục gói khám
+      description: Khôi phục gói khám đã xóa mềm.
+      tags:
+        - "4. Admin - Packages"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestoreSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

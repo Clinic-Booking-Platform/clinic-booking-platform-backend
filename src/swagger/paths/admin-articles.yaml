@@ -1,0 +1,125 @@
+paths:
+  /admin/articles:
+    get:
+      summary: Lấy danh sách bài viết
+      description: Lấy danh sách tất cả bài viết (bao gồm cả đã xóa).
+      tags:
+        - "4. Admin - Articles"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/SpecialtyIdParam'
+        - $ref: '#/components/parameters/AuthorIdParam'
+        - name: status
+          in: query
+          description: Trạng thái (Tùy chọn)
+          schema:
+            type: string
+            enum: [all, active, deleted]
+            example: all
+        - name: showDeleted
+          in: query
+          description: Hiển thị bài viết đã xóa (Tùy chọn)
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+    post:
+      summary: Tạo bài viết
+      description: Tạo bài viết mới. Bắt buộc truyền author_id (ID bác sĩ).
+      tags:
+        - "4. Admin - Articles"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateArticleRequest'
+            example:
+              title: "Sức khỏe tim mạch"
+              content: "Nội dung bài viết..."
+              author_id: 1
+              specialty_id: 1
+      responses:
+        '201':
+          description: Tạo thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/articles/{id}:
+    get:
+      summary: Lấy chi tiết bài viết
+      description: Lấy chi tiết bài viết theo ID.
+      tags:
+        - "4. Admin - Articles"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Cập nhật bài viết
+      description: Cập nhật bài viết bất kỳ.
+      tags:
+        - "4. Admin - Articles"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateArticleRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      summary: Xóa mềm bài viết
+      description: Đánh dấu xóa bài viết.
+      tags:
+        - "4. Admin - Articles"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

@@ -1,0 +1,162 @@
+paths:
+  /doctor/appointments:
+    get:
+      tags:
+        - "5. Doctor - Appointments"
+      summary: "List appointments of my patients"
+      description: "Lấy danh sách lịch khám của bệnh nhân thuộc ca trực của mình."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: "Trang hiện tại (Tùy chọn)"
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+          description: "Trạng thái lịch hẹn (Tùy chọn)"
+        - in: query
+          name: from_date
+          schema:
+            type: string
+            format: date
+          description: "Từ ngày (Tùy chọn)"
+        - in: query
+          name: to_date
+          schema:
+            type: string
+            format: date
+          description: "Đến ngày (Tùy chọn)"
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: "Tìm kiếm theo tên hoặc SĐT bệnh nhân (Tùy chọn)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedResponse"
+              example:
+                status: "success"
+                message: "Lấy danh sách thành công"
+                data:
+                  items:
+                    - id: 1
+                      patient_name: "Nguyễn Văn A"
+                      phone: "0912345678"
+                      status: "CONFIRMED"
+                      appointment_date: "2024-01-20"
+                  totalItems: 1
+                  totalPages: 1
+                  currentPage: 1
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /doctor/appointments/{id}:
+    get:
+      tags:
+        - "5. Doctor - Appointments"
+      summary: "Appointment detail"
+      description: "Lấy chi tiết lịch hẹn."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID lịch hẹn (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+    delete:
+      tags:
+        - "5. Doctor - Appointments"
+      summary: "Cancel patient appointment"
+      description: "Hủy lịch hẹn của bệnh nhân, tự động giải phóng slot khám."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID lịch hẹn (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/SuccessMessage"
+              example:
+                status: "success"
+                message: "Hủy lịch hẹn thành công"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+
+  /doctor/appointments/{id}/status:
+    put:
+      tags:
+        - "5. Doctor - Appointments"
+      summary: "Update appointment status"
+      description: "Cập nhật trạng thái lịch hẹn: PENDING -> CONFIRMED -> COMPLETED / NO_SHOW."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID lịch hẹn (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAppointmentStatusRequest"
+            example:
+              status: "COMPLETED"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Cập nhật trạng thái thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"

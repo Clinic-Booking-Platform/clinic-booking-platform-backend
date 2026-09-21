@@ -1,0 +1,32 @@
+paths:
+  /admin/prescriptions/medical-record/{medicalRecordId}:
+    get:
+      summary: Xem đơn thuốc theo hồ sơ bệnh án
+      description: Xem đơn thuốc theo ID hồ sơ bệnh án (Chỉ xem).
+      tags:
+        - "4. Admin - Prescriptions (READ-ONLY)"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: medicalRecordId
+          in: path
+          required: true
+          description: ID hồ sơ bệnh án (Bắt buộc)
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrescriptionItem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

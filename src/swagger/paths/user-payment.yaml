@@ -1,0 +1,65 @@
+paths:
+  /payment/checkout-cart:
+    post:
+      tags:
+        - "3. User - Payment"
+      summary: "Thanh toán giỏ hàng"
+      description: |
+        - Tạo Order UNPAID từ giỏ hàng hiện tại.
+        - Trả về URL thanh toán VNPay có thời hạn 15 phút.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+            example: {}
+      responses:
+        '201':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  order_code: "ORD_123456"
+                  payment_url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?..."
+                  total_price: 2000000
+        '400':
+          description: "Giỏ hàng rỗng"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /payment/repay/{id}:
+    post:
+      tags:
+        - "3. User - Payment"
+      summary: "Thanh toán lại"
+      description: |
+        - Tạo URL thanh toán VNPay cho đơn hàng bị FAILED hoặc UNPAID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Order ID hoặc order_code (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  order_code: "ORD_123456"
+                  payment_url: "https://sandbox.vnpayment.vn/..."
+                  total_price: 2000000
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

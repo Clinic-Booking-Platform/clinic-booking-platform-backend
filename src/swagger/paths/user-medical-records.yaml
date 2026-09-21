@@ -1,0 +1,49 @@
+paths:
+  /medical-records:
+    get:
+      tags:
+        - "3. User - Medical Records"
+      summary: "Danh sách hồ sơ bệnh án"
+      description: |
+        - Lấy danh sách hồ sơ bệnh án của người dùng (chỉ đọc).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /medical-records/{id}:
+    get:
+      tags:
+        - "3. User - Medical Records"
+      summary: "Chi tiết hồ sơ bệnh án"
+      description: |
+        - Lấy thông tin chi tiết bệnh án, chẩn đoán, chỉ số, đơn thuốc và file đính kèm.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  diagnosis: "Cảm cúm"
+                  prescriptions: []
+                  attachments: []
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

@@ -1,0 +1,46 @@
+paths:
+  /admin/carts:
+    get:
+      summary: Lấy danh sách giỏ hàng
+      description: Lấy danh sách tất cả giỏ hàng của người dùng.
+      tags:
+        - "4. Admin - Carts"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/MinPriceParam'
+        - $ref: '#/components/parameters/MaxPriceParam'
+        - $ref: '#/components/parameters/PriceRangeParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/carts/{id}:
+    get:
+      summary: Lấy chi tiết giỏ hàng
+      description: Lấy chi tiết giỏ hàng (hỗ trợ ID giỏ hàng hoặc ID người dùng).
+      tags:
+        - "4. Admin - Carts"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

@@ -1,0 +1,77 @@
+paths:
+  /upload/single:
+    post:
+      tags:
+        - "3. User - Upload"
+      summary: "Tải lên 1 ảnh"
+      description: |
+        - Tải lên một tệp tin hình ảnh.
+        - Hỗ trợ jpg, jpeg, png, webp, jfif. Max 5MB.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: "Tệp tin hình ảnh (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSingleResponse'
+              example:
+                status: "success"
+                data:
+                  url: "https://example.com/image.jpg"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /upload/multiple:
+    post:
+      tags:
+        - "3. User - Upload"
+      summary: "Tải lên nhiều ảnh"
+      description: |
+        - Tải lên tối đa 10 ảnh cùng lúc.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: "Danh sách tệp tin hình ảnh (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadMultipleResponse'
+              example:
+                status: "success"
+                data:
+                  urls:
+                    - "https://example.com/img1.jpg"
+                    - "https://example.com/img2.jpg"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'

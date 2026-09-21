@@ -1,0 +1,158 @@
+paths:
+  /doctor/articles:
+    get:
+      tags:
+        - "5. Doctor - Articles"
+      summary: "List my articles"
+      description: "Lấy danh sách bài viết của bác sĩ."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: "Trang hiện tại (Tùy chọn)"
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: "Tìm kiếm theo tiêu đề (Tùy chọn)"
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [all, active, deleted]
+            default: active
+          description: "Trạng thái bài viết (Tùy chọn)"
+        - in: query
+          name: showDeleted
+          schema:
+            type: boolean
+            default: false
+          description: "Bao gồm bài viết đã xóa (Tùy chọn)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedResponse"
+              example:
+                status: "success"
+                message: "Lấy danh sách bài viết thành công"
+                data:
+                  items:
+                    - id: 1
+                      title: "Cách phòng ngừa bệnh tiểu đường"
+                      short_description: "Những lưu ý quan trọng để phòng ngừa..."
+                  totalItems: 1
+                  totalPages: 1
+                  currentPage: 1
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      tags:
+        - "5. Doctor - Articles"
+      summary: "Create article"
+      description: "Tạo bài viết mới. Tác giả (author_id) và chuyên khoa (specialty_id) tự động lấy từ token."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateArticleRequest"
+            example:
+              title: "Dấu hiệu nhận biết đau dạ dày"
+              html_content: "<p>Đau ở vùng thượng vị là dấu hiệu phổ biến...</p>"
+              thumbnail_url: "https://example.com/image.jpg"
+              short_description: "Đau dạ dày là bệnh lý phổ biến..."
+              specialty_id: 2
+      responses:
+        '201':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Tạo bài viết thành công"
+                data:
+                  id: 2
+                  title: "Dấu hiệu nhận biết đau dạ dày"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /doctor/articles/{id}:
+    get:
+      tags:
+        - "5. Doctor - Articles"
+      summary: "My article detail"
+      description: "Lấy thông tin chi tiết bài viết của mình."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID bài viết (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+    put:
+      tags:
+        - "5. Doctor - Articles"
+      summary: "Update my article"
+      description: "Cập nhật bài viết. Chỉ cập nhật bài của mình."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID bài viết (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateArticleRequest"
+            example:
+              title: "Dấu hiệu nhận biết đau dạ dày (Cập nhật)"
+              short_description: "Đau dạ dày là bệnh lý phổ biến hiện nay..."
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Cập nhật thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"

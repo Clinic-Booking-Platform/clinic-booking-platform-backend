@@ -1,0 +1,150 @@
+paths:
+  /admin/doctors:
+    post:
+      summary: Tạo tài khoản bác sĩ
+      description: |-
+        - Dành cho Quản trị viên (ADMIN) tạo tài khoản bác sĩ mới.
+        - Bác sĩ sẽ có quyền đăng nhập và quản lý lịch khám.
+      tags:
+        - "4. Admin - Doctors"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDoctorRequest'
+            example:
+              fullname: "Nguyễn Văn A"
+              email: "bacsia@clinic.com"
+              password: "password123"
+              confirmPassword: "password123"
+              specialty_id: 1
+              price: 500000
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              example:
+                message: "Tạo tài khoản bác sĩ thành công"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Lấy danh sách bác sĩ
+      description: Lấy danh sách tất cả bác sĩ (bao gồm cả đã xóa mềm).
+      tags:
+        - "4. Admin - Doctors"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SpecialtyIdParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          description: Trạng thái (Tùy chọn)
+          schema:
+            type: string
+            enum: [all, active, deleted]
+            example: all
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/doctors/{id}:
+    get:
+      summary: Lấy chi tiết bác sĩ
+      description: Lấy chi tiết thông tin bác sĩ theo ID (kể cả đã xóa mềm).
+      tags:
+        - "4. Admin - Doctors"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Cập nhật thông tin bác sĩ
+      description: Cập nhật thông tin cho bác sĩ.
+      tags:
+        - "4. Admin - Doctors"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDoctorRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      summary: Xóa mềm bác sĩ
+      description: Đánh dấu bác sĩ là đã xóa.
+      tags:
+        - "4. Admin - Doctors"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /admin/doctors-restore/{id}:
+    post:
+      summary: Khôi phục bác sĩ
+      description: Khôi phục tài khoản bác sĩ đã xóa mềm.
+      tags:
+        - "4. Admin - Doctors"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestoreSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

@@ -1,0 +1,63 @@
+paths:
+  /doctors:
+    get:
+      tags:
+        - "3. User - Doctors"
+      summary: "Danh sách bác sĩ"
+      description: |
+        - Lấy danh sách bác sĩ đang hoạt động (active).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SpecialtyIdParam'
+        - $ref: '#/components/parameters/SearchParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/PaginatedResponse'
+              example:
+                status: "success"
+                data:
+                  data:
+                    - id: 1
+                      user:
+                        full_name: "Bác sĩ A"
+                  meta:
+                    total: 5
+                    page: 1
+                    lastPage: 1
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /doctors/{id}:
+    get:
+      tags:
+        - "3. User - Doctors"
+      summary: "Chi tiết bác sĩ"
+      description: |
+        - Xem thông tin chi tiết của 1 bác sĩ.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  specialty:
+                    name: "Nội khoa"
+                  user:
+                    full_name: "Bác sĩ A"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

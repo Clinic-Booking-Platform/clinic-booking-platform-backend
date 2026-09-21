@@ -1,0 +1,71 @@
+paths:
+  /login:
+    post:
+      tags:
+        - "1. Auth"
+      summary: "Đăng nhập"
+      description: |
+        - Đăng nhập hệ thống bằng email và mật khẩu.
+        - Trả về token và thông tin user nếu thành công.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "user@example.com"
+              password: "Password123!"
+      responses:
+        '200':
+          description: "Đăng nhập thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+                  user:
+                    id: 1
+                    email: "user@example.com"
+                    full_name: "Nguyễn Văn A"
+                    phone_number: "0123456789"
+                    avatar: null
+                    roleId: 3
+                    role: "USER"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /register:
+    post:
+      tags:
+        - "1. Auth"
+      summary: "Đăng ký tài khoản"
+      description: |
+        - Đăng ký tài khoản mới với vai trò người dùng (USER).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              fullname: "Nguyễn Văn A"
+              email: "user@example.com"
+              password: "Password123!"
+              confirmPassword: "Password123!"
+      responses:
+        '201':
+          description: "Đăng ký thành công"
+          content:
+            application/json:
+              example:
+                message: "Đăng ký thành công"
+        '400':
+          description: "Email đã tồn tại hoặc dữ liệu không hợp lệ"
+          content:
+            application/json:
+              example:
+                message: "Email đã được sử dụng"

@@ -1,0 +1,81 @@
+paths:
+  /schedules:
+    get:
+      tags:
+        - "3. User - Schedules"
+      summary: "Lịch khám trống"
+      description: |
+        - Xem danh sách các lịch khám còn trống (AVAILABLE) của bác sĩ.
+        - Mặc định lọc từ ngày hôm nay (UTC+7).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: doctor_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: "ID Bác sĩ (Bắt buộc)"
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: "Ngày cụ thể (Tùy chọn)"
+        - name: from_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: "Từ ngày (Tùy chọn)"
+        - name: to_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: "Đến ngày (Tùy chọn)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  - id: 1
+                    doctor_id: 2
+                    date: "2024-05-01"
+                    time_type: "08:00 - 09:00"
+                    status: "AVAILABLE"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /schedules/{id}:
+    get:
+      tags:
+        - "3. User - Schedules"
+      summary: "Chi tiết lịch khám"
+      description: |
+        - Xem thông tin chi tiết 1 lịch khám.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  date: "2024-05-01"
+                  status: "AVAILABLE"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

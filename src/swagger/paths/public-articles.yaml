@@ -1,0 +1,61 @@
+paths:
+  /articles:
+    get:
+      tags:
+        - "2. Public - Articles"
+      summary: "Danh sách bài viết"
+      description: |
+        - Lấy danh sách bài viết đang hoạt động (active).
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/SpecialtyIdParam'
+        - $ref: '#/components/parameters/AuthorIdParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/PaginatedResponse'
+              example:
+                status: "success"
+                data:
+                  data:
+                    - id: 1
+                      title: "Bài viết 1"
+                      slug: "bai-viet-1"
+                  meta:
+                    total: 10
+                    page: 1
+                    lastPage: 2
+
+  /articles/{slug}:
+    get:
+      tags:
+        - "2. Public - Articles"
+      summary: "Chi tiết bài viết"
+      description: |
+        - Lấy chi tiết bài viết theo slug, tự động tăng views.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Slug bài viết (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  title: "Bài viết 1"
+                  slug: "bai-viet-1"
+                  article_detail:
+                    content: "<p>Nội dung</p>"
+        '404':
+          $ref: '#/components/responses/NotFoundError'

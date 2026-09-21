@@ -1,0 +1,94 @@
+paths:
+  /orders:
+    get:
+      tags:
+        - "3. User - Orders"
+      summary: "Danh sách đơn hàng"
+      description: |
+        - Xem lịch sử mua gói khám của người dùng.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: "Kích thước trang (Tùy chọn)"
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [UNPAID, PAID, FAILED, CANCELLED]
+          description: "Lọc theo trạng thái (Tùy chọn)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /orders/{id}:
+    get:
+      tags:
+        - "3. User - Orders"
+      summary: "Chi tiết đơn hàng"
+      description: |
+        - Xem thông tin chi tiết đơn hàng, kèm tiến độ sử dụng số lượt khám của từng gói.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Order ID hoặc order_code (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  order_code: "ORD_123"
+                  status: "PAID"
+                  order_details:
+                    - id: 1
+                      package_name: "Khám tai mũi họng"
+                      quantity: 5
+                      used_count: 2
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - "3. User - Orders"
+      summary: "Hủy đơn hàng"
+      description: |
+        - Hủy đơn hàng chưa thanh toán (UNPAID).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Order ID hoặc order_code (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

@@ -1,0 +1,54 @@
+paths:
+  /me:
+    get:
+      tags:
+        - "3. User - Profile"
+      summary: "Lấy thông tin cá nhân"
+      description: |
+        - Xem thông tin tài khoản hiện tại.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  email: "user@example.com"
+                  role: "USER"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    put:
+      tags:
+        - "3. User - Profile"
+      summary: "Cập nhật hồ sơ"
+      description: |
+        - Cập nhật thông tin cá nhân.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              full_name: "Nguyễn Văn B"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  full_name: "Nguyễn Văn B"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'

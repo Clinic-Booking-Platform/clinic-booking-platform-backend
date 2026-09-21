@@ -9,6 +9,8 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 dotenv_1.default.config();
 const cors_1 = __importDefault(require("cors"));
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const swagger_config_js_1 = require("./swagger/swagger.config.js");
 const api_js_1 = require("./routes/api.js");
 const Seed_js_1 = require("./seed/Seed.js");
 const app = (0, express_1.default)();
@@ -22,6 +24,24 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // Static files – ảnh upload có thể truy cập qua /images/<filename>
 app.use('/images', express_1.default.static(path_1.default.join(process.cwd(), 'src/public/images')));
+// ============================================================
+// SWAGGER API DOCS
+// ============================================================
+app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_config_js_1.swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Clinic Booking API Docs',
+    swaggerOptions: {
+        docExpansion: 'none',
+        filter: true,
+        tagsSorter: 'alpha',
+        operationsSorter: 'method',
+        persistAuthorization: true,
+    },
+}));
+app.get('/api-docs-json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swagger_config_js_1.swaggerSpec);
+});
 // ============================================================
 // ROUTES
 // ============================================================

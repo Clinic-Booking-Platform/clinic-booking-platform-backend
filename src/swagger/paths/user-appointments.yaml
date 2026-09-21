@@ -1,0 +1,133 @@
+paths:
+  /appointments:
+    post:
+      tags:
+        - "3. User - Appointments"
+      summary: "Đặt lịch trực tiếp"
+      description: |
+        - Đặt lịch khám bệnh không thông qua mua gói.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentRequest'
+            example:
+              schedule_id: 1
+              reason: "Khám tổng quát"
+      responses:
+        '201':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                message: "Đặt lịch thành công"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    get:
+      tags:
+        - "3. User - Appointments"
+      summary: "Lịch sử đặt lịch"
+      description: |
+        - Lấy danh sách các cuộc hẹn của user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+          description: "Lọc theo trạng thái (Tùy chọn)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /appointments/book-from-order/{id}:
+    post:
+      tags:
+        - "3. User - Appointments"
+      summary: "Đặt lịch từ đơn hàng"
+      description: |
+        - Đặt lịch khám sử dụng số lượt khám đã mua trong Order.
+        - Yêu cầu order đã thanh toán (PAID) và chưa hết lượt.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "ID của OrderDetail (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookFromOrderRequest'
+            example:
+              schedule_id: 2
+              reason: "Khám dịch vụ đã mua"
+      responses:
+        '201':
+          description: "Thành công"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /appointments/{id}:
+    get:
+      tags:
+        - "3. User - Appointments"
+      summary: "Chi tiết cuộc hẹn"
+      description: |
+        - Xem thông tin chi tiết cuộc hẹn.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  status: "PENDING"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - "3. User - Appointments"
+      summary: "Hủy cuộc hẹn"
+      description: |
+        - Hủy lịch hẹn (chỉ áp dụng cho PENDING). Tự động nhả 1 suất lịch khám.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: "Thành công"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'

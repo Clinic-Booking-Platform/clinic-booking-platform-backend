@@ -1,0 +1,110 @@
+paths:
+  /cart:
+    get:
+      tags:
+        - "3. User - Cart"
+      summary: "Xem giỏ hàng"
+      description: |
+        - Xem thông tin giỏ hàng hiện tại của user, bao gồm chi tiết gói khám và tổng tiền.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  total_price: 2000000
+                  cart_details:
+                    - id: 1
+                      quantity: 2
+                      package:
+                        id: 1
+                        name: "Gói khám tổng quát"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /cart/items:
+    post:
+      tags:
+        - "3. User - Cart"
+      summary: "Thêm gói vào giỏ"
+      description: |
+        - Thêm 1 gói khám vào giỏ hàng. Nếu đã có sẽ cộng dồn số lượng.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+            example:
+              package_id: 1
+              quantity: 1
+      responses:
+        '201':
+          description: "Thêm thành công"
+          content:
+            application/json:
+              example:
+                message: "Thêm vào giỏ hàng thành công"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /cart-quantity/{packageId}:
+    put:
+      tags:
+        - "3. User - Cart"
+      summary: "Cập nhật số lượng"
+      description: |
+        - Cập nhật số lượng của 1 gói khám trong giỏ.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: packageId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "ID gói khám (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartQuantityRequest'
+            example:
+              quantity: 2
+      responses:
+        '200':
+          description: "Thành công"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /carts/{packageId}:
+    delete:
+      tags:
+        - "3. User - Cart"
+      summary: "Xóa khỏi giỏ hàng"
+      description: |
+        - Xóa gói khám khỏi giỏ. Truyền 'all' hoặc 'clear' để xóa toàn bộ giỏ hàng.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: packageId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "ID gói khám hoặc 'all'/'clear' (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'

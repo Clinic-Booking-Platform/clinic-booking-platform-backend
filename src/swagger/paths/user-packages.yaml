@@ -1,0 +1,64 @@
+paths:
+  /packages:
+    get:
+      tags:
+        - "3. User - Packages"
+      summary: "Danh sách gói khám"
+      description: |
+        - Lấy danh sách các gói khám đang hoạt động.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/MinPriceParam'
+        - $ref: '#/components/parameters/MaxPriceParam'
+        - $ref: '#/components/parameters/PriceRangeParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/PaginatedResponse'
+              example:
+                status: "success"
+                data:
+                  data:
+                    - id: 1
+                      name: "Gói khám tổng quát"
+                      price: 1000000
+                  meta:
+                    total: 5
+                    page: 1
+                    lastPage: 1
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /packages/{id}:
+    get:
+      tags:
+        - "3. User - Packages"
+      summary: "Chi tiết gói khám"
+      description: |
+        - Lấy chi tiết gói khám bao gồm nội dung html.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  id: 1
+                  name: "Gói khám tổng quát"
+                  package_detail:
+                    html_content: "<p>Chi tiết gói khám</p>"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

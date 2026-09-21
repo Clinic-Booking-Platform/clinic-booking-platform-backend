@@ -1,0 +1,46 @@
+paths:
+  /admin/medical-records:
+    get:
+      summary: Lấy danh sách hồ sơ bệnh án
+      description: Lấy danh sách tất cả hồ sơ bệnh án (Chỉ xem).
+      tags:
+        - "4. Admin - Medical Records (READ-ONLY)"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/FromDateParam'
+        - $ref: '#/components/parameters/ToDateParam'
+        - $ref: '#/components/parameters/DoctorIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/medical-records/{id}:
+    get:
+      summary: Lấy chi tiết hồ sơ bệnh án
+      description: Lấy chi tiết hồ sơ bệnh án (Chỉ xem).
+      tags:
+        - "4. Admin - Medical Records (READ-ONLY)"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecord'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

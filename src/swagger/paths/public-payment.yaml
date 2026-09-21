@@ -1,0 +1,55 @@
+paths:
+  /payment/vnpay-return:
+    get:
+      tags:
+        - "2. Public - Payment Info"
+      summary: "Xử lý VNPay callback"
+      description: |
+        - Endpoint nhận callback từ VNPay sau khi thanh toán.
+        - Xác thực chữ ký và cập nhật trạng thái đơn hàng.
+      parameters:
+        - name: vnp_Amount
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Số tiền (Bắt buộc)"
+        - name: vnp_ResponseCode
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Mã phản hồi VNPay (Bắt buộc)"
+        - name: vnp_TxnRef
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Mã giao dịch (Bắt buộc)"
+        - name: vnp_SecureHash
+          in: query
+          required: true
+          schema:
+            type: string
+          description: "Mã hash bảo mật (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+
+  /payment/banks:
+    get:
+      tags:
+        - "2. Public - Payment Info"
+      summary: "Danh sách ngân hàng"
+      description: |
+        - Lấy danh sách ngân hàng hỗ trợ VNPay.
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  - bank_code: "VNPAYQR"
+                    bank_name: "Thanh toán QR"

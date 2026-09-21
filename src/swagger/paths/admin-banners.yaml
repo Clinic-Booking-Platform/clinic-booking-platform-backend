@@ -1,0 +1,117 @@
+paths:
+  /admin/banners:
+    get:
+      summary: Lấy danh sách banner
+      description: Lấy danh sách banner.
+      tags:
+        - "4. Admin - Banners"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/BannerStatusParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+    post:
+      summary: Tạo banner
+      description: Tạo banner mới.
+      tags:
+        - "4. Admin - Banners"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBannerRequest'
+            example:
+              title: "Khuyến mãi mùa hè"
+              image_url: "https://example.com/banner.jpg"
+              link_url: "https://example.com/promo"
+              is_active: true
+      responses:
+        '201':
+          description: Tạo thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/banners/{id}:
+    put:
+      summary: Cập nhật banner
+      description: Cập nhật thông tin banner.
+      tags:
+        - "4. Admin - Banners"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBannerRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      summary: Xóa vĩnh viễn banner
+      description: Xóa vĩnh viễn banner.
+      tags:
+        - "4. Admin - Banners"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /admin/banners-status/{id}:
+    put:
+      summary: Đổi trạng thái banner
+      description: Bật/tắt trạng thái hiển thị banner.
+      tags:
+        - "4. Admin - Banners"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeBannerStatusRequest'
+            example:
+              is_active: false
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

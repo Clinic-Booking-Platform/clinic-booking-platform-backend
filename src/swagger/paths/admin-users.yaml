@@ -1,0 +1,69 @@
+paths:
+  /admin/user:
+    get:
+      summary: Lấy danh sách người dùng thường
+      description: |-
+        - Lấy danh sách người dùng có role=USER.
+      tags:
+        - "4. Admin - Users"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          description: Trạng thái (Tùy chọn)
+          schema:
+            type: string
+            enum: [all, active, deleted]
+            example: all
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/user/{id}:
+    delete:
+      summary: Xóa mềm người dùng
+      description: |-
+        - Xóa mềm người dùng theo ID.
+        - Không thể xóa ADMIN hoặc DOCTOR.
+      tags:
+        - "4. Admin - Users"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /admin/user-restore/{id}:
+    post:
+      summary: Khôi phục người dùng
+      description: Khôi phục người dùng đã xóa mềm.
+      tags:
+        - "4. Admin - Users"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestoreSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

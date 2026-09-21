@@ -5,6 +5,8 @@ import rateLimit from 'express-rate-limit';
 dotenv.config();
 
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './swagger/swagger.config.js';
 import { adminRouter, authRouter, doctorRouter, userRouter } from './routes/api.js';
 import { initialData } from './seed/Seed.js';
 
@@ -21,6 +23,25 @@ app.use(express.urlencoded({ extended: true }));
 
 // Static files – ảnh upload có thể truy cập qua /images/<filename>
 app.use('/images', express.static(path.join(process.cwd(), 'src/public/images')));
+
+// ============================================================
+// SWAGGER API DOCS
+// ============================================================
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Clinic Booking API Docs',
+    swaggerOptions: {
+        docExpansion: 'none',
+        filter: true,
+        tagsSorter: 'alpha',
+        operationsSorter: 'method',
+        persistAuthorization: true,
+    },
+}));
+app.get('/api-docs-json', (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
 
 // ============================================================
 // ROUTES

@@ -1,0 +1,53 @@
+paths:
+  /admin/orders:
+    get:
+      summary: Lấy danh sách đơn hàng
+      description: Lấy danh sách tất cả đơn hàng. Hỗ trợ tìm kiếm theo order_code, tên người dùng, email.
+      tags:
+        - "4. Admin - Orders"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          description: Trạng thái thanh toán (Tùy chọn)
+          schema:
+            type: string
+            enum: [PAID, UNPAID, FAILED, CANCELLED]
+            example: PAID
+        - $ref: '#/components/parameters/FromDateParam'
+        - $ref: '#/components/parameters/ToDateParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/orders/{id}:
+    get:
+      summary: Lấy chi tiết đơn hàng
+      description: Lấy chi tiết đơn hàng (hỗ trợ theo ID hoặc order_code).
+      tags:
+        - "4. Admin - Orders"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

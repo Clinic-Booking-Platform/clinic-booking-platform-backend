@@ -1,0 +1,140 @@
+paths:
+  /admin/schedules:
+    get:
+      summary: Lấy danh sách lịch khám
+      description: Lấy danh sách tất cả lịch khám của các bác sĩ.
+      tags:
+        - "4. Admin - Schedules"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/DoctorIdParam'
+        - $ref: '#/components/parameters/DateParam'
+        - $ref: '#/components/parameters/FromDateParam'
+        - $ref: '#/components/parameters/ToDateParam'
+        - $ref: '#/components/parameters/ScheduleStatusParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+    post:
+      summary: Tạo lịch khám
+      description: Tạo lịch khám mới. Bắt buộc truyền doctor_id.
+      tags:
+        - "4. Admin - Schedules"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduleRequest'
+            example:
+              doctor_id: 1
+              date: "2023-10-15"
+              time_slot: "08:00-08:30"
+              max_patients: 1
+      responses:
+        '201':
+          description: Tạo thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/schedules/bulk:
+    post:
+      summary: Tạo hàng loạt lịch khám
+      description: Tạo hàng loạt lịch khám. Bắt buộc truyền doctor_id.
+      tags:
+        - "4. Admin - Schedules"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkCreateScheduleRequest'
+            example:
+              doctor_id: 1
+              dates: ["2023-10-15", "2023-10-16"]
+              time_slots: ["08:00-08:30", "08:30-09:00"]
+      responses:
+        '201':
+          description: Tạo hàng loạt thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/schedules/{id}:
+    get:
+      summary: Lấy chi tiết lịch khám
+      description: Lấy chi tiết lịch khám.
+      tags:
+        - "4. Admin - Schedules"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Cập nhật lịch khám
+      description: Cập nhật thông tin lịch khám bất kỳ.
+      tags:
+        - "4. Admin - Schedules"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScheduleRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      summary: Xóa vĩnh viễn lịch khám
+      description: Xóa vĩnh viễn lịch khám.
+      tags:
+        - "4. Admin - Schedules"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

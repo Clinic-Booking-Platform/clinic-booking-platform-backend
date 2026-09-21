@@ -1,0 +1,148 @@
+# ============================================================
+# SHARED RESPONSES – Response templates dùng chung
+# ============================================================
+components:
+  responses:
+    UnauthorizedError:
+      description: "Chưa đăng nhập hoặc token hết hạn"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          example:
+            message: "Không tồn tại token"
+
+    ForbiddenAdminError:
+      description: "Không có quyền truy cập (yêu cầu ADMIN)"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                nullable: true
+              message:
+                type: string
+          example:
+            data: null
+            message: "Không có quyền truy cập (yêu cầu ADMIN)"
+
+    ForbiddenDoctorError:
+      description: "Không có quyền truy cập (yêu cầu DOCTOR hoặc ADMIN)"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                nullable: true
+              message:
+                type: string
+          example:
+            data: null
+            message: "Không có quyền truy cập (yêu cầu DOCTOR hoặc ADMIN)"
+
+    NotFoundError:
+      description: "Không tìm thấy tài nguyên"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+          example:
+            status: "error"
+            message: "Không tìm thấy dữ liệu"
+
+    ValidationError:
+      description: "Dữ liệu gửi lên không hợp lệ"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    message:
+                      type: string
+          example:
+            status: "error"
+            message: "Dữ liệu không hợp lệ"
+            errors:
+              - field: "email"
+                message: "Email không đúng định dạng"
+
+    InternalServerError:
+      description: "Lỗi hệ thống"
+      content:
+        application/json:
+          example:
+            status: "error"
+            message: "Đã xảy ra lỗi, vui lòng thử lại sau"
+
+    SuccessMessage:
+      description: "Thao tác thành công"
+      content:
+        application/json:
+          example:
+            status: "success"
+            message: "Thao tác thành công"
+
+    DeleteSuccess:
+      description: "Xóa thành công"
+      content:
+        application/json:
+          example:
+            status: "success"
+            message: "Xóa thành công"
+
+    RestoreSuccess:
+      description: "Khôi phục thành công"
+      content:
+        application/json:
+          example:
+            status: "success"
+            message: "Khôi phục thành công"
+
+    PaginatedResponse:
+      description: |
+        Phản hồi danh sách có phân trang.
+        Mỗi API trả về cấu trúc tương tự, khác nhau ở phần `data` chứa mảng bản ghi.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              data:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: "Tổng số bản ghi"
+                    example: 25
+                  page:
+                    type: integer
+                    description: "Trang hiện tại"
+                    example: 1
+                  totalPages:
+                    type: integer
+                    description: "Tổng số trang"
+                    example: 5

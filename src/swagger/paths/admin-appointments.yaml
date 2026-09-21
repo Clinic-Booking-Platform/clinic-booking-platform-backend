@@ -1,0 +1,93 @@
+paths:
+  /admin/appointments:
+    get:
+      summary: Lấy danh sách cuộc hẹn
+      description: Lấy danh sách tất cả cuộc hẹn. Hỗ trợ tìm kiếm theo tên bệnh nhân, số điện thoại, tên bác sĩ.
+      tags:
+        - "4. Admin - Appointments"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/AppointmentStatusParam'
+        - $ref: '#/components/parameters/FromDateParam'
+        - $ref: '#/components/parameters/ToDateParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/DoctorIdParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/appointments/{id}:
+    get:
+      summary: Lấy chi tiết cuộc hẹn
+      description: Lấy thông tin chi tiết cuộc hẹn.
+      tags:
+        - "4. Admin - Appointments"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      summary: Hủy cuộc hẹn
+      description: Hủy cuộc hẹn bất kỳ và tự động giải phóng slot lịch khám.
+      tags:
+        - "4. Admin - Appointments"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /admin/appointments/{id}/status:
+    put:
+      summary: Cập nhật trạng thái cuộc hẹn
+      description: Cập nhật trạng thái cuộc hẹn bất kỳ.
+      tags:
+        - "4. Admin - Appointments"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAppointmentStatusRequest'
+            example:
+              status: "COMPLETED"
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

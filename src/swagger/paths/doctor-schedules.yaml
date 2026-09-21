@@ -1,0 +1,208 @@
+paths:
+  /doctor/schedules:
+    get:
+      tags:
+        - "5. Doctor - Schedules"
+      summary: "List my schedules"
+      description: "Lấy danh sách ca khám của bác sĩ (tất cả trạng thái). Doctor ID được lấy tự động từ token."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: "Trang hiện tại (Tùy chọn)"
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: "Lọc theo ngày cụ thể, định dạng YYYY-MM-DD (Tùy chọn)"
+        - in: query
+          name: from_date
+          schema:
+            type: string
+            format: date
+          description: "Từ ngày, định dạng YYYY-MM-DD (Tùy chọn)"
+        - in: query
+          name: to_date
+          schema:
+            type: string
+            format: date
+          description: "Đến ngày, định dạng YYYY-MM-DD (Tùy chọn)"
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [AVAILABLE, FULL, CANCELLED]
+          description: "Trạng thái ca khám (Tùy chọn)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedResponse"
+              example:
+                status: "success"
+                message: "Lấy danh sách thành công"
+                data:
+                  items:
+                    - id: 1
+                      doctor_id: 10
+                      date: "2024-01-20"
+                      time_type: "T1"
+                      max_number: 10
+                      current_number: 0
+                      status: "AVAILABLE"
+                  totalItems: 1
+                  totalPages: 1
+                  currentPage: 1
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      tags:
+        - "5. Doctor - Schedules"
+      summary: "Create 1 schedule"
+      description: "Tạo 1 ca khám mới. doctor_id lấy tự động từ token."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScheduleRequest"
+            example:
+              date: "2024-01-21"
+              time_type: "T2"
+              max_number: 10
+      responses:
+        '201':
+          description: "Tạo thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Tạo ca khám thành công"
+                data:
+                  id: 2
+                  doctor_id: 10
+                  date: "2024-01-21"
+                  time_type: "T2"
+                  max_number: 10
+                  current_number: 0
+                  status: "AVAILABLE"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /doctor/schedules/bulk:
+    post:
+      tags:
+        - "5. Doctor - Schedules"
+      summary: "Bulk create schedules"
+      description: "Tạo nhiều ca khám cùng lúc cho một ngày."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkCreateScheduleRequest"
+            example:
+              date: "2024-01-22"
+              time_types: ["T1", "T2", "T3"]
+              max_number: 10
+      responses:
+        '201':
+          description: "Tạo thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Tạo các ca khám thành công"
+                data:
+                  count: 3
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /doctor/schedules/{id}:
+    get:
+      tags:
+        - "5. Doctor - Schedules"
+      summary: "Schedule detail"
+      description: "Lấy thông tin chi tiết 1 ca khám của bác sĩ."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID ca khám (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"
+    put:
+      tags:
+        - "5. Doctor - Schedules"
+      summary: "Update own schedule"
+      description: "Cập nhật ca khám. Chỉ sửa được ca của chính mình."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: "ID ca khám (Bắt buộc)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateScheduleRequest"
+            example:
+              max_number: 15
+              status: "AVAILABLE"
+      responses:
+        '200':
+          description: "Cập nhật thành công"
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                status: "success"
+                message: "Cập nhật thành công"
+        '400':
+          $ref: "#/components/responses/ValidationError"
+        '401':
+          $ref: "#/components/responses/UnauthorizedError"
+        '403':
+          $ref: "#/components/responses/ForbiddenDoctorError"
+        '404':
+          $ref: "#/components/responses/NotFoundError"

@@ -1,0 +1,136 @@
+paths:
+  /admin/specialties:
+    get:
+      summary: Lấy danh sách chuyên khoa
+      description: Lấy danh sách chuyên khoa (bao gồm cả trạng thái xóa).
+      tags:
+        - "4. Admin - Specialties"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - name: status
+          in: query
+          description: Trạng thái (Tùy chọn)
+          schema:
+            type: string
+            enum: [all, active, deleted]
+            example: all
+      responses:
+        '200':
+          $ref: '#/components/responses/PaginatedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+    post:
+      summary: Tạo chuyên khoa
+      description: Tạo chuyên khoa mới.
+      tags:
+        - "4. Admin - Specialties"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSpecialtyRequest'
+            example:
+              name: "Tim mạch"
+              description: "Chuyên khoa điều trị các bệnh về tim"
+              image_url: "https://example.com/image.jpg"
+      responses:
+        '201':
+          description: Tạo thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+
+  /admin/specialties/{id}:
+    get:
+      summary: Lấy chi tiết chuyên khoa
+      description: Lấy chi tiết chuyên khoa.
+      tags:
+        - "4. Admin - Specialties"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specialty'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Cập nhật chuyên khoa
+      description: Cập nhật thông tin chuyên khoa.
+      tags:
+        - "4. Admin - Specialties"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSpecialtyRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      summary: Xóa mềm chuyên khoa
+      description: Xóa mềm chuyên khoa.
+      tags:
+        - "4. Admin - Specialties"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /admin/specialties-restore/{id}:
+    post:
+      summary: Khôi phục chuyên khoa
+      description: Khôi phục chuyên khoa đã xóa mềm.
+      tags:
+        - "4. Admin - Specialties"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestoreSuccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenAdminError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

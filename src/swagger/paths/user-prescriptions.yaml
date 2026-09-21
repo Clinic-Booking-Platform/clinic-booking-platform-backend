@@ -1,0 +1,34 @@
+paths:
+  /prescriptions/medical-record/{medicalRecordId}:
+    get:
+      tags:
+        - "3. User - Prescriptions"
+      summary: "Đơn thuốc theo hồ sơ"
+      description: |
+        - Lấy danh sách các loại thuốc trong đơn thuốc thuộc một hồ sơ bệnh án cụ thể.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: medicalRecordId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: "ID Hồ sơ bệnh án (Bắt buộc)"
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  - id: 1
+                    medicine_name: "Paracetamol"
+                    dosage: "2 viên/ngày"
+                    quantity: 10
+                    usage_instructions: "Uống sau ăn"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

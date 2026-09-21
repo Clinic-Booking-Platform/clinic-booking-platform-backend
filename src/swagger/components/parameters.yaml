@@ -1,0 +1,161 @@
+# ============================================================
+# SHARED PARAMETERS – Query params dùng chung
+# ============================================================
+components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      description: "Số trang (Tùy chọn, mặc định = 1)"
+      example: 1
+
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 5
+        minimum: 1
+      description: "Số bản ghi mỗi trang (Tùy chọn, mặc định = 5)"
+      example: 5
+
+    SearchParam:
+      name: search
+      in: query
+      schema:
+        type: string
+      description: "Từ khóa tìm kiếm (Tùy chọn)"
+      example: "Nguyễn"
+
+    StatusFilterParam:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [all, active, deleted]
+      description: "Lọc theo trạng thái soft-delete (Tùy chọn): all = tất cả, active = đang hoạt động, deleted = đã xóa mềm"
+      example: "active"
+
+    FromDateParam:
+      name: from_date
+      in: query
+      schema:
+        type: string
+        format: date
+      description: "Lọc từ ngày (Tùy chọn, format YYYY-MM-DD)"
+      example: "2026-09-01"
+
+    ToDateParam:
+      name: to_date
+      in: query
+      schema:
+        type: string
+        format: date
+      description: "Lọc đến ngày (Tùy chọn, format YYYY-MM-DD)"
+      example: "2026-09-30"
+
+    DateParam:
+      name: date
+      in: query
+      schema:
+        type: string
+        format: date
+      description: "Lọc theo ngày cụ thể (Tùy chọn, format YYYY-MM-DD)"
+      example: "2026-09-25"
+
+    DoctorIdParam:
+      name: doctor_id
+      in: query
+      schema:
+        type: integer
+      description: "Lọc theo ID bác sĩ (Tùy chọn)"
+      example: 1
+
+    SpecialtyIdParam:
+      name: specialty_id
+      in: query
+      schema:
+        type: integer
+      description: "Lọc theo ID chuyên khoa (Tùy chọn)"
+      example: 1
+
+    AuthorIdParam:
+      name: author_id
+      in: query
+      schema:
+        type: integer
+      description: "Lọc theo ID bác sĩ tác giả (Tùy chọn)"
+      example: 1
+
+    IdPathParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: "ID của tài nguyên (Bắt buộc)"
+      example: 1
+
+    AppointmentStatusParam:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+      description: "Lọc theo trạng thái lịch hẹn (Tùy chọn)"
+      example: "PENDING"
+
+    ScheduleStatusParam:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [AVAILABLE, FULL, CANCELLED]
+      description: "Lọc theo trạng thái ca làm việc (Tùy chọn)"
+      example: "AVAILABLE"
+
+    PaymentStatusParam:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [UNPAID, PAID, FAILED, CANCELLED]
+      description: "Lọc theo trạng thái thanh toán (Tùy chọn)"
+      example: "PAID"
+
+    MinPriceParam:
+      name: minPrice
+      in: query
+      schema:
+        type: number
+      description: "Giá tối thiểu (Tùy chọn)"
+      example: 100000
+
+    MaxPriceParam:
+      name: maxPrice
+      in: query
+      schema:
+        type: number
+      description: "Giá tối đa (Tùy chọn)"
+      example: 1000000
+
+    PriceRangeParam:
+      name: price_range
+      in: query
+      schema:
+        type: string
+      description: "Khoảng giá linh hoạt (Tùy chọn). VD: '100-300', 'tren-1000', '>1000', '1000+'"
+      example: "100-500"
+
+    BannerStatusParam:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [all, active, inactive]
+      description: "Lọc banner theo trạng thái (Tùy chọn): all, active, inactive"
+      example: "active"

@@ -1,0 +1,24 @@
+paths:
+  /banners:
+    get:
+      tags:
+        - "3. User - Banners"
+      summary: "Danh sách banner"
+      description: |
+        - Lấy danh sách banner đang hoạt động, sắp xếp theo sort_order.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Thành công"
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  - id: 1
+                    image_url: "https://example.com/banner1.jpg"
+                    link_url: "https://example.com"
+                    sort_order: 1
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
