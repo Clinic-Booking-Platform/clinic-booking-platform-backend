@@ -64,11 +64,34 @@ docker compose up -d --build
 
 ## 🌐 Các cổng dịch vụ & Địa chỉ truy cập
 
-| Dịch vụ | Địa chỉ truy cập | Thông tin đăng nhập |
+| Dịch vụ | Địa chỉ truy cập | Ghi chú |
 |---|---|---|
 | **Backend API** | [http://localhost:8080](http://localhost:8080) | Cổng gọi API cho Frontend / Postman |
-| **Quản lý Database (phpMyAdmin)** | [http://localhost:8081](http://localhost:8081) | User: `root` <br> Mật khẩu: `123456` (hoặc theo `.env`) |
-| **Kết nối DBeaver / Navicat / TablePlus** | **Host:** `localhost`<br>**Port:** `3307` | Database: `clinic_booking`<br>User: `root` \| Password: `123456` |
+| **Database Cloud (Aiven)** | [console.aiven.io](https://console.aiven.io/) | MySQL Cloud dùng chung cho cả nhóm |
+
+---
+
+## 🗄️ Hướng dẫn kết nối Database Aiven bằng DBeaver (Dùng chung cho cả nhóm)
+
+Cả nhóm kết nối trực tiếp vào database chung trên **Aiven Cloud** bằng **DBeaver** theo các bước sau:
+
+1. Mở **DBeaver** $\rightarrow$ bấm biểu tượng **New Database Connection** 🔌 $\rightarrow$ chọn **MySQL**.
+2. Nhập thông tin kết nối:
+   * **Host:** `mysqlclinicbooking-clincbooking.e.aivencloud.com`
+   * **Port:** `25198`
+   * **Database:** `defaultdb`
+   * **Username:** `avnadmin`
+   * **Password:** *(Xem trong file `.env` hoặc hỏi nhóm trưởng)*
+3. **Cấu hình SSL (Bắt buộc đối với Aiven):**
+   * **Cách nhanh nhất (khuyên dùng):** 
+     - Vào tab **SSL**: Bỏ tích ô *Use SSL*.
+     - Chuyển sang tab **Driver properties**:
+       - Tìm thuộc tính `sslMode` $\rightarrow$ đổi thành `REQUIRED`.
+       - Tìm thuộc tính `allowPublicKeyRetrieval` $\rightarrow$ đổi thành `true`.
+   * **Hoặc cách tải file cert:**
+     - Vào tab **SSL**, tích chọn *Use SSL* $\rightarrow$ tại ô **CA Certificate**, bấm Browse và chọn file `ca.pem` tải từ Aiven.
+4. Bấm **Test Connection** $\rightarrow$ Khi hiện thông báo thành công thì bấm **Finish**.
+
 
 ---
 
