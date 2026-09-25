@@ -11,6 +11,7 @@ const auth_api_js_2 = require("../controllers/auth/auth.api.js");
 const multer_js_1 = require("../middleware/multer.js");
 const upload_api_js_1 = require("../controllers/upload/upload.api.js");
 const auth_services_js_1 = require("../middleware/auth.services.js");
+const rateLimit_middleware_js_1 = require("../middleware/rateLimit.middleware.js");
 const user_controller_js_1 = require("../controllers/user/user.controller.js");
 const doctor_api_js_1 = require("../controllers/doctor/doctor.api.js");
 const specialty_api_js_1 = require("../controllers/specialty/specialty.api.js");
@@ -32,10 +33,10 @@ exports.userRouter.use(auth_services_js_1.authMiddlewareClients);
 exports.adminRouter.use(auth_services_js_1.authMiddlewareADMIN);
 exports.doctorRouter.use(auth_services_js_1.authMiddlewareDOCTOR);
 // ============================================================
-// AUTH – Đăng nhập / Đăng ký (public)
+// AUTH – Đăng nhập / Đăng ký (public - bảo vệ bằng authLimiter)
 // ============================================================
-exports.authRouter.post('/login', auth_api_js_1.loginAPI);
-exports.authRouter.post('/register', auth_api_js_2.registerAPI);
+exports.authRouter.post('/login', rateLimit_middleware_js_1.authLimiter, auth_api_js_1.loginAPI);
+exports.authRouter.post('/register', rateLimit_middleware_js_1.authLimiter, auth_api_js_2.registerAPI);
 // ============================================================
 // UPLOAD – Upload file (cần JWT)
 // ============================================================

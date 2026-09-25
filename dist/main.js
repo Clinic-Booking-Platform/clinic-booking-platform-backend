@@ -6,14 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 dotenv_1.default.config();
 const cors_1 = __importDefault(require("cors"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_config_js_1 = require("./swagger/swagger.config.js");
 const api_js_1 = require("./routes/api.js");
 const Seed_js_1 = require("./seed/Seed.js");
+const rateLimit_middleware_js_1 = require("./middleware/rateLimit.middleware.js");
 const app = (0, express_1.default)();
+app.set('trust proxy', 1);
 const port = process.env.PORT || 8080;
 const hostname = process.env.HOST_NAME || 'localhost';
 // ============================================================
@@ -43,22 +44,12 @@ app.get('/api-docs-json', (req, res) => {
     res.send(swagger_config_js_1.swaggerSpec);
 });
 // ============================================================
-// ROUTES
+// RATE LIMITER & ROUTES
 // ============================================================
-const limiter = (0, express_rate_limit_1.default)({
-    windowMs: 15 * 60 * 1000, // Khung thời gian 15 phút
-    max: 100, // Tối đa 100 requests mỗi IP trong 15 phút
-    message: {
-        status: 429,
-        message: 'Bạn đã gửi quá nhiều yêu cầu, vui lòng thử lại sau 15 phút!'
-    },
-    standardHeaders: true, // Trả về thông tin giới hạn trong header `RateLimit-*`
-    legacyHeaders: false, // Tắt header cũ `X-RateLimit-*`
-});
+app.use(rateLimit_middleware_js_1.generalLimiter);
 (0, Seed_js_1.initialData)().catch((err) => {
     console.warn('⚠️ Seed data skipped or table not created yet:', err.message);
 });
-app.use(limiter);
 app.use('/', api_js_1.authRouter);
 app.use('/admin', api_js_1.adminRouter);
 app.use('/', api_js_1.userRouter);

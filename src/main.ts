@@ -1,7 +1,6 @@
 import express, { Application, Request, Response } from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
-import rateLimit from 'express-rate-limit';
 dotenv.config();
 
 import cors from 'cors';
@@ -9,8 +8,10 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger/swagger.config.js';
 import { adminRouter, authRouter, doctorRouter, userRouter } from './routes/api.js';
 import { initialData } from './seed/Seed.js';
+import { generalLimiter } from './middleware/rateLimit.middleware.js';
 
 const app: Application = express();
+app.set('trust proxy', 1);
 const port = process.env.PORT || 8080;
 const hostname = process.env.HOST_NAME || 'localhost';
 
@@ -44,23 +45,13 @@ app.get('/api-docs-json', (req: Request, res: Response) => {
 });
 
 // ============================================================
-// ROUTES
+// RATE LIMITER & ROUTES
 // ============================================================
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // Khung thời gian 15 phút
-    max: 100, // Tối đa 100 requests mỗi IP trong 15 phút
-    message: {
-        status: 429,
-        message: 'Bạn đã gửi quá nhiều yêu cầu, vui lòng thử lại sau 15 phút!'
-    },
-    standardHeaders: true, // Trả về thông tin giới hạn trong header `RateLimit-*`
-    legacyHeaders: false, // Tắt header cũ `X-RateLimit-*`
-});
+app.use(generalLimiter);
 
 initialData().catch((err) => {
     console.warn('⚠️ Seed data skipped or table not created yet:', err.message);
 });
-app.use(limiter);
 app.use('/', authRouter);
 app.use('/admin', adminRouter);
 app.use('/', userRouter);

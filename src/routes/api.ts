@@ -5,6 +5,7 @@ import { registerAPI } from '../controllers/auth/auth.api.js';
 import { uploadMultipleMiddleware, uploadSingleMiddleware } from '../middleware/multer.js';
 import { uploadMultipleFiles, uploadSingleFile } from '../controllers/upload/upload.api.js';
 import { authMiddlewareADMIN, authMiddlewareClients, authMiddlewareDOCTOR } from '../middleware/auth.services.js';
+import { authLimiter } from '../middleware/rateLimit.middleware.js';
 import { deleteUserAPI, getMeAPI, getUsersAPI, putMeAPI, restoreUserAPI } from '../controllers/user/user.controller.js';
 import { deleteDoctorAPI, getDoctorDetailAPI, getDoctorsAPI, restoreDoctorAPI, updateDoctorAPI } from '../controllers/doctor/doctor.api.js';
 import {
@@ -116,10 +117,10 @@ adminRouter.use(authMiddlewareADMIN);
 doctorRouter.use(authMiddlewareDOCTOR);
 
 // ============================================================
-// AUTH – Đăng nhập / Đăng ký (public)
+// AUTH – Đăng nhập / Đăng ký (public - bảo vệ bằng authLimiter)
 // ============================================================
-authRouter.post('/login', loginAPI);
-authRouter.post('/register', registerAPI);
+authRouter.post('/login', authLimiter, loginAPI);
+authRouter.post('/register', authLimiter, registerAPI);
 
 // ============================================================
 // UPLOAD – Upload file (cần JWT)
