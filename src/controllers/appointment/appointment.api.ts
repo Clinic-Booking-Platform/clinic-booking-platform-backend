@@ -487,10 +487,12 @@ export const updateDoctorAppointmentStatusAPI = async (req: Request, res: Respon
  */
 export const getAdminAppointmentsAPI = async (req: Request, res: Response) => {
     try {
-        const { page, status, from_date, to_date, search, doctor_id } = req.query;
+        const { page, pageSize, limit, status, from_date, to_date, search, doctor_id } = req.query;
+        const parsedPageSize = pageSize ? Number(pageSize) : (limit ? Number(limit) : undefined);
 
         const data = await getAllAppointmentsAdminService({
             page: page ? Number(page) : undefined,
+            pageSize: parsedPageSize && !isNaN(parsedPageSize) ? parsedPageSize : undefined,
             status: status ? String(status) : undefined,
             from_date: from_date ? String(from_date) : undefined,
             to_date: to_date ? String(to_date) : undefined,

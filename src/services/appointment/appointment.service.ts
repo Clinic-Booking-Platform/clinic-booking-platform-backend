@@ -795,7 +795,8 @@ export const getAllAppointmentsAdminService = async (
     query?: GetAdminAppointmentsQuery
 ) => {
     const page = Math.max(1, Number(query?.page || 1));
-    const skip = (page - 1) * pageSize;
+    const size = query?.pageSize ? Math.max(1, Number(query.pageSize)) : pageSize;
+    const skip = (page - 1) * size;
 
     const where: any = {};
 
@@ -843,8 +844,20 @@ export const getAllAppointmentsAdminService = async (
         prisma.appointment.count({ where }),
         prisma.appointment.findMany({
             where,
+            include: {
+                doctor: {
+                    select: {
+                        id: true,
+                        user: { select: { id: true, full_name: true, avatar: true } },
+                        specialty: { select: { id: true, name: true } },
+                    },
+                },
+                package: {
+                    select: { id: true, name: true, price: true },
+                },
+            },
             skip,
-            take: pageSize,
+            take: size,
             orderBy: { date: 'desc' },
         }),
     ]);
@@ -854,8 +867,8 @@ export const getAllAppointmentsAdminService = async (
         pagination: {
             total,
             page,
-            pageSize,
-            totalPages: Math.ceil(total / pageSize),
+            pageSize: size,
+            totalPages: Math.ceil(total / size),
         },
     };
 };

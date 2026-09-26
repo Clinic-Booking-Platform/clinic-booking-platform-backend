@@ -655,7 +655,8 @@ exports.updateAppointmentStatusService = updateAppointmentStatusService;
  */
 const getAllAppointmentsAdminService = async (query) => {
     const page = Math.max(1, Number(query?.page || 1));
-    const skip = (page - 1) * constant_js_1.pageSize;
+    const size = query?.pageSize ? Math.max(1, Number(query.pageSize)) : constant_js_1.pageSize;
+    const skip = (page - 1) * size;
     const where = {};
     // Lọc theo trạng thái
     if (query?.status && query.status.toUpperCase() !== 'ALL') {
@@ -697,8 +698,20 @@ const getAllAppointmentsAdminService = async (query) => {
         client_js_1.prisma.appointment.count({ where }),
         client_js_1.prisma.appointment.findMany({
             where,
+            include: {
+                doctor: {
+                    select: {
+                        id: true,
+                        user: { select: { id: true, full_name: true, avatar: true } },
+                        specialty: { select: { id: true, name: true } },
+                    },
+                },
+                package: {
+                    select: { id: true, name: true, price: true },
+                },
+            },
             skip,
-            take: constant_js_1.pageSize,
+            take: size,
             orderBy: { date: 'desc' },
         }),
     ]);
@@ -707,8 +720,8 @@ const getAllAppointmentsAdminService = async (query) => {
         pagination: {
             total,
             page,
-            pageSize: constant_js_1.pageSize,
-            totalPages: Math.ceil(total / constant_js_1.pageSize),
+            pageSize: size,
+            totalPages: Math.ceil(total / size),
         },
     };
 };

@@ -47,6 +47,7 @@ export interface GetDoctorAppointmentsQuery {
  */
 export interface GetAdminAppointmentsQuery {
     page?: number;
+    pageSize?: number;
     status?: string;        // PENDING | CONFIRMED | COMPLETED | CANCELLED | NO_SHOW
     from_date?: string;     // YYYY-MM-DD
     to_date?: string;       // YYYY-MM-DD
