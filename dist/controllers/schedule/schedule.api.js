@@ -255,11 +255,17 @@ const updateScheduleAPI = async (req, res) => {
             requestDoctorId = doctor?.id;
         }
         // Admin: không truyền requestDoctorId → bỏ qua ownership check
-        const updated = await (0, schedule_service_js_1.updateScheduleService)(scheduleId, parsed.data, requestDoctorId);
+        const result = await (0, schedule_service_js_1.updateScheduleService)(scheduleId, parsed.data, requestDoctorId);
+        let message = 'Cập nhật ca làm việc thành công';
+        if (parsed.data.status === 'CANCELLED') {
+            message = result.cancelled_appointments_count > 0
+                ? `Hủy ca làm việc thành công. Đã tự động hủy ${result.cancelled_appointments_count} lịch hẹn của bệnh nhân trong ca này.`
+                : 'Hủy ca làm việc thành công. Ca này chưa có bệnh nhân nào đặt trước.';
+        }
         return res.status(200).json({
             status: 'success',
-            message: 'Cập nhật ca làm việc thành công',
-            data: updated,
+            message,
+            data: result,
         });
     }
     catch (error) {

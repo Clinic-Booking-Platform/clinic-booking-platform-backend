@@ -244,12 +244,35 @@ const updateScheduleService = async (scheduleId, data, requestDoctorId // Nếu 
         updateData.max_number = data.max_number;
     if (data.status !== undefined)
         updateData.status = data.status;
-    const updated = await client_js_1.prisma.schedule.update({
-        where: { id: scheduleId },
-        data: updateData,
-        include: scheduleInclude,
+    return await client_js_1.prisma.$transaction(async (tx) => {
+        const updated = await tx.schedule.update({
+            where: { id: scheduleId },
+            data: updateData,
+            include: scheduleInclude,
+        });
+        let cancelledAppointmentsCount = 0;
+        // Khi Bác sĩ hoặc Admin hủy ca (status: CANCELLED) -> Tự động hủy toàn bộ lịch hẹn PENDING / CONFIRMED trong ca đó
+        if (data.status === 'CANCELLED') {
+            const cancelResult = await tx.appointment.updateMany({
+                where: {
+                    doctor_id: schedule.doctor_id,
+                    date: schedule.date,
+                    time_type: schedule.time_type,
+                    status: { in: [constant_js_1.AppointmentStatus.PENDING, constant_js_1.AppointmentStatus.CONFIRMED] },
+                    deleted_at: null,
+                },
+                data: {
+                    status: constant_js_1.AppointmentStatus.CANCELLED,
+                    deleted_at: new Date(),
+                },
+            });
+            cancelledAppointmentsCount = cancelResult.count;
+        }
+        return {
+            schedule: updated,
+            cancelled_appointments_count: cancelledAppointmentsCount,
+        };
     });
-    return true;
 };
 exports.updateScheduleService = updateScheduleService;
 /**
