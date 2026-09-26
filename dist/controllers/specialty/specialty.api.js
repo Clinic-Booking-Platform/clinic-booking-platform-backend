@@ -16,12 +16,16 @@ const constant_js_1 = require("../../config/constant.js");
  */
 const getSpecialtiesAPI = async (req, res) => {
     try {
-        const { page, search, status } = req.query;
+        const { page, pageSize, limit, all, search, status } = req.query;
         const isAdmin = req.user?.role === constant_js_1.RoleType.ADMIN;
         // Admin mặc định lấy tất cả ('all'), Bệnh nhân luôn chỉ lấy chuyên khoa đang mở ('active')
         const filterStatus = isAdmin ? (status || 'all') : 'active';
+        const isAll = all === 'true' || all === '1';
+        const parsedPageSize = pageSize ? Number(pageSize) : (limit ? Number(limit) : undefined);
         const data = await (0, specialty_service_js_1.getSpecialtiesService)({
             page: page ? Number(page) : 1,
+            pageSize: parsedPageSize && !isNaN(parsedPageSize) ? parsedPageSize : undefined,
+            all: isAll,
             search: search ? String(search) : undefined,
             status: filterStatus,
         });

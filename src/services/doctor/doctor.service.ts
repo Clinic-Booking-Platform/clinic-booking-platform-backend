@@ -8,7 +8,6 @@ import { GetDoctorsOptions, UpdateDoctorData } from '../../types/doctor/Doctor.j
  */
 export const getDoctorsService = async (options?: GetDoctorsOptions) => {
     const page = Math.max(1, Number(options?.page || 1));
-    const size = options?.pageSize || defaultPageSize;
     const search = options?.search?.trim();
     const specialtyId = options?.specialty_id ? Number(options.specialty_id) : undefined;
     const status = options?.status || 'active'; // Mặc định chỉ lấy bác sĩ đang hoạt động
@@ -52,6 +51,25 @@ export const getDoctorsService = async (options?: GetDoctorsOptions) => {
         },
     };
 
+    if (options?.all) {
+        const doctors = await prisma.doctor.findMany({
+            where,
+            include,
+            orderBy: { id: 'desc' },
+        });
+
+        return {
+            doctors,
+            pagination: {
+                total: doctors.length,
+                page: 1,
+                pageSize: doctors.length,
+                totalPages: 1,
+            },
+        };
+    }
+
+    const size = options?.pageSize ? Math.max(1, Number(options.pageSize)) : defaultPageSize;
     const skip = (page - 1) * size;
     const [total, doctors] = await prisma.$transaction([
         prisma.doctor.count({ where }),

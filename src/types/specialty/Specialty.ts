@@ -1,6 +1,7 @@
 export interface GetSpecialtiesOptions {
     page?: number;
     pageSize?: number;
+    all?: boolean;
     search?: string;
     status?: 'all' | 'active' | 'deleted';
 }

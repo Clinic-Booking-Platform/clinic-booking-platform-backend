@@ -34,8 +34,26 @@ export const getSpecialtiesService = async (options?: GetSpecialtiesOptions) => 
         },
     };
 
+    if (options?.all) {
+        const specialties = await prisma.specialty.findMany({
+            where,
+            include,
+            orderBy: { id: 'asc' },
+        });
+
+        return {
+            specialties,
+            pagination: {
+                total: specialties.length,
+                page: 1,
+                pageSize: specialties.length,
+                totalPages: 1,
+            },
+        };
+    }
+
     const page = Math.max(1, Number(options?.page || 1));
-    const size = options?.pageSize || defaultPageSize;
+    const size = options?.pageSize ? Math.max(1, Number(options.pageSize)) : defaultPageSize;
     const skip = (page - 1) * size;
 
     const [total, specialties] = await prisma.$transaction([

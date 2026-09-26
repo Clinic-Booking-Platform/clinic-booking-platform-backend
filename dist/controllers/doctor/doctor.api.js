@@ -17,13 +17,17 @@ const constant_js_1 = require("../../config/constant.js");
  */
 const getDoctorsAPI = async (req, res) => {
     try {
-        const { page, specialty_id, search, status } = req.query;
+        const { page, pageSize, limit, all, specialty_id, search, status } = req.query;
         const isAdmin = req.user?.role === constant_js_1.RoleType.ADMIN;
         // Admin mặc định thấy toàn bộ danh sách (cả bác sĩ đã bị xóa mềm) để quản lý
         // Bệnh nhân thì luôn chỉ thấy bác sĩ đang hoạt động
         const filterStatus = isAdmin ? (status || 'all') : 'active';
+        const isAll = all === 'true' || all === '1';
+        const parsedPageSize = pageSize ? Number(pageSize) : (limit ? Number(limit) : undefined);
         const data = await (0, doctor_service_js_1.getDoctorsService)({
             page: page ? Number(page) : 1,
+            pageSize: parsedPageSize && !isNaN(parsedPageSize) ? parsedPageSize : undefined,
+            all: isAll,
             specialty_id: specialty_id ? Number(specialty_id) : undefined,
             search: search ? String(search) : undefined,
             status: filterStatus,

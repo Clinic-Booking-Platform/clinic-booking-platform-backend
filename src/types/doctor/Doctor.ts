@@ -1,6 +1,7 @@
 export interface GetDoctorsOptions {
     page?: number;
     pageSize?: number;
+    all?: boolean;
     specialty_id?: number;
     search?: string;
     status?: 'all' | 'active' | 'deleted';
