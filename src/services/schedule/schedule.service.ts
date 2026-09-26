@@ -1,5 +1,5 @@
 import { prisma } from '../../config/client.js';
-import { pageSize as defaultPageSize } from '../../config/constant.js';
+import { AppointmentStatus, pageSize as defaultPageSize } from '../../config/constant.js';
 import {
     GetSchedulesOptions,
     CreateScheduleData,
@@ -83,8 +83,27 @@ export const getSchedulesService = async (options?: GetSchedulesOptions) => {
         }),
     ]);
 
+    // Tính toán số lượng bệnh nhân đã đặt (current_number) cho từng ca làm việc
+    const schedulesWithBookings = await Promise.all(
+        schedules.map(async (s) => {
+            const current_number = await prisma.appointment.count({
+                where: {
+                    doctor_id: s.doctor_id,
+                    date: s.date,
+                    time_type: s.time_type,
+                    status: { not: AppointmentStatus.CANCELLED },
+                    deleted_at: null,
+                },
+            });
+            return {
+                ...s,
+                current_number,
+            };
+        })
+    );
+
     return {
-        schedules,
+        schedules: schedulesWithBookings,
         pagination: {
             total,
             page,
@@ -107,7 +126,20 @@ export const getScheduleByIdService = async (scheduleId: number) => {
         throw new Error('Ca làm việc không tồn tại');
     }
 
-    return schedule;
+    const current_number = await prisma.appointment.count({
+        where: {
+            doctor_id: schedule.doctor_id,
+            date: schedule.date,
+            time_type: schedule.time_type,
+            status: { not: AppointmentStatus.CANCELLED },
+            deleted_at: null,
+        },
+    });
+
+    return {
+        ...schedule,
+        current_number,
+    };
 };
 
 /**
