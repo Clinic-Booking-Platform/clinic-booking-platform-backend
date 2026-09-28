@@ -23,6 +23,24 @@ components:
       description: "Số bản ghi mỗi trang (Tùy chọn, mặc định = 5)"
       example: 5
 
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+      description: "Số bản ghi mỗi trang (Alias thay thế cho pageSize)"
+      example: 10
+
+    AllParam:
+      name: all
+      in: query
+      schema:
+        type: boolean
+        default: false
+      description: "Lấy tất cả bản ghi không phân trang (Tùy chọn, vd: all=true cho Select dropdown)"
+      example: true
+
     SearchParam:
       name: search
       in: query

@@ -7,6 +7,7 @@ paths:
       description: |
         - Đăng nhập hệ thống bằng email và mật khẩu.
         - Trả về token và thông tin user nếu thành công.
+        - Rate limit: Tối đa 20 lượt yêu cầu trong 15 phút từ 1 IP.
       requestBody:
         required: true
         content:
@@ -37,6 +38,8 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
 
   /register:
     post:
@@ -45,6 +48,7 @@ paths:
       summary: "Đăng ký tài khoản"
       description: |
         - Đăng ký tài khoản mới với vai trò người dùng (USER).
+        - Rate limit: Tối đa 20 lượt yêu cầu trong 15 phút từ 1 IP.
       requestBody:
         required: true
         content:
@@ -69,3 +73,5 @@ paths:
             application/json:
               example:
                 message: "Email đã được sử dụng"
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'

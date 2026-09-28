@@ -95,6 +95,14 @@ components:
             status: "error"
             message: "Đã xảy ra lỗi, vui lòng thử lại sau"
 
+    TooManyRequestsError:
+      description: "Quá nhiều yêu cầu trong khoảng thời gian quy định (Rate limit 429)"
+      content:
+        application/json:
+          example:
+            status: 429
+            message: "Bạn đã gửi quá nhiều yêu cầu xác thực, vui lòng thử lại sau 15 phút!"
+
     SuccessMessage:
       description: "Thao tác thành công"
       content:

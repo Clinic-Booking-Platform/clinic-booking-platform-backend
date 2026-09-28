@@ -48,7 +48,9 @@ paths:
                   - id: 1
                     doctor_id: 2
                     date: "2024-05-01"
-                    time_type: "08:00 - 09:00"
+                    time_type: "T1"
+                    max_number: 10
+                    current_number: 3
                     status: "AVAILABLE"
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -73,7 +75,11 @@ paths:
                 status: "success"
                 data:
                   id: 1
+                  doctor_id: 2
                   date: "2024-05-01"
+                  time_type: "T1"
+                  max_number: 10
+                  current_number: 3
                   status: "AVAILABLE"
         '401':
           $ref: '#/components/responses/UnauthorizedError'

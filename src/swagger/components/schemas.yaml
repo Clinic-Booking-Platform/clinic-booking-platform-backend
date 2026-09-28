@@ -193,6 +193,10 @@ components:
         max_number:
           type: integer
           example: 10
+        current_number:
+          type: integer
+          description: "Số lượng bệnh nhân đã đặt ca khám này (chỉ tính lịch hẹn chưa bị hủy)"
+          example: 3
         status:
           type: string
           example: "AVAILABLE"
@@ -292,6 +296,48 @@ components:
           format: date-time
           nullable: true
           example: null
+        doctor:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+              example: 1
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 3
+                full_name:
+                  type: string
+                  example: "BS. Trần Văn B"
+                avatar:
+                  type: string
+                  nullable: true
+                  example: "https://example.com/avatar.jpg"
+            specialty:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 2
+                name:
+                  type: string
+                  example: "Nội tổng quát"
+        package:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+              example: 5
+            name:
+              type: string
+              example: "Gói khám tổng quát"
+            price:
+              type: string
+              example: "500000.00"
 
     Article:
       type: object
@@ -791,6 +837,16 @@ components:
           enum: [AVAILABLE, FULL, CANCELLED]
           description: "Trạng thái ca làm việc (Tùy chọn)"
           example: "CANCELLED"
+
+    UpdateScheduleResponseData:
+      type: object
+      properties:
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+        cancelled_appointments_count:
+          type: integer
+          description: "Số lượng lịch hẹn bị tự động hủy khi đổi status ca khám thành CANCELLED"
+          example: 2
 
     CreateArticleRequest:
       type: object

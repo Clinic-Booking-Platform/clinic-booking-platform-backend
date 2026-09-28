@@ -9,6 +9,8 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/LimitParam'
         - $ref: '#/components/parameters/DoctorIdParam'
         - $ref: '#/components/parameters/DateParam'
         - $ref: '#/components/parameters/FromDateParam'
@@ -98,7 +100,9 @@ paths:
           $ref: '#/components/responses/NotFoundError'
     put:
       summary: Cập nhật lịch khám
-      description: Cập nhật thông tin lịch khám bất kỳ.
+      description: |
+        - Cập nhật thông tin lịch khám bất kỳ.
+        - Lưu ý nghiệp vụ: Nếu cập nhật trạng thái thành CANCELLED (hủy ca), hệ thống sẽ tự động hủy toàn bộ lịch hẹn đang ở trạng thái PENDING hoặc CONFIRMED trong ca đó.
       tags:
         - "4. Admin - Schedules"
       security:
@@ -113,7 +117,20 @@ paths:
               $ref: '#/components/schemas/UpdateScheduleRequest'
       responses:
         '200':
-          description: Cập nhật thành công
+          description: "Cập nhật thành công. Nếu hủy ca khám, trả về thông tin ca khám và số lượng lịch hẹn bị tự động hủy."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Hủy ca làm việc thành công. Đã tự động hủy 2 lịch hẹn của bệnh nhân trong ca này."
+                  data:
+                    $ref: '#/components/schemas/UpdateScheduleResponseData'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':

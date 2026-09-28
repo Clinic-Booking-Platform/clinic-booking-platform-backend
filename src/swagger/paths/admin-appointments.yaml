@@ -2,13 +2,15 @@ paths:
   /admin/appointments:
     get:
       summary: Lấy danh sách cuộc hẹn
-      description: Lấy danh sách tất cả cuộc hẹn. Hỗ trợ tìm kiếm theo tên bệnh nhân, số điện thoại, tên bác sĩ.
+      description: Lấy danh sách tất cả cuộc hẹn (kèm thông tin bác sĩ, chuyên khoa, gói khám nếu có). Hỗ trợ tìm kiếm theo tên bệnh nhân, số điện thoại, tên bác sĩ.
       tags:
         - "4. Admin - Appointments"
       security:
         - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/LimitParam'
         - $ref: '#/components/parameters/AppointmentStatusParam'
         - $ref: '#/components/parameters/FromDateParam'
         - $ref: '#/components/parameters/ToDateParam'
