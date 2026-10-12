@@ -22,7 +22,7 @@ import { prisma } from '../../config/client.js';
  */
 export const getSchedulesAPI = async (req: Request, res: Response) => {
     try {
-        const { page, doctor_id, date, from_date, to_date, status } = req.query;
+        const { page, doctor_id, date, from_date, to_date, status, pageSize, limit } = req.query;
         const role = req.user?.role;
 
         // Bệnh nhân / Khách hàng: bắt buộc phải chọn bác sĩ để xem lịch trống
@@ -66,6 +66,7 @@ export const getSchedulesAPI = async (req: Request, res: Response) => {
 
         const data = await getSchedulesService({
             page: page ? Number(page) : 1,
+            pageSize: pageSize ? Number(pageSize) : (limit ? Number(limit) : undefined),
             doctor_id: filterDoctorId,
             date: date ? String(date) : undefined,
             from_date: fromDate,
