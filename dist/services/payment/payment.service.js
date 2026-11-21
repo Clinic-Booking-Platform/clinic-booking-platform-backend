@@ -1,10 +1,18 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.repayOrderPaymentService = exports.getBankListService = exports.verifyPaymentReturnService = exports.checkoutCartPaymentService = void 0;
 const vnpay_1 = require("vnpay");
+const dayjs_1 = __importDefault(require("dayjs"));
+const utc_js_1 = __importDefault(require("dayjs/plugin/utc.js"));
+const timezone_js_1 = __importDefault(require("dayjs/plugin/timezone.js"));
 const client_js_1 = require("../../config/client.js");
 const vnpay_js_1 = require("../../config/vnpay.js");
 const constant_js_1 = require("../../config/constant.js");
+dayjs_1.default.extend(utc_js_1.default);
+dayjs_1.default.extend(timezone_js_1.default);
 /**
  * Thanh toán toàn bộ Giỏ hàng: Khởi tạo Order & URL thanh toán VNPay
  */
@@ -41,9 +49,9 @@ const checkoutCartPaymentService = async (data) => {
                 },
             },
         });
-        // 4. Sinh URL thanh toán VNPay (kèm thời hạn 15 phút đếm ngược trên VNPay)
-        const now = new Date();
-        const expireDate = new Date(now.getTime() + constant_js_1.ORDER_PAYMENT_TIMEOUT_MINUTES * 60 * 1000);
+        // 4. Sinh URL thanh toán VNPay theo giờ Việt Nam (UTC+7, kèm thời hạn 15 phút đếm ngược trên VNPay)
+        const nowVN = (0, dayjs_1.default)().tz('Asia/Ho_Chi_Minh');
+        const expireVN = nowVN.add(constant_js_1.ORDER_PAYMENT_TIMEOUT_MINUTES, 'minute');
         const paymentUrl = vnpay_js_1.vnpay.buildPaymentUrl({
             vnp_Amount: totalAmount,
             vnp_IpAddr: data.client_ip || '127.0.0.1',
@@ -52,8 +60,8 @@ const checkoutCartPaymentService = async (data) => {
             vnp_OrderType: vnpay_1.ProductCode.Pharmacy_MedicalServices,
             vnp_ReturnUrl: process.env.VNP_RETURN_URL || 'http://localhost:8080/payment/vnpay-return',
             vnp_Locale: vnpay_1.VnpLocale.VN,
-            vnp_CreateDate: (0, vnpay_1.dateFormat)(now),
-            vnp_ExpireDate: (0, vnpay_1.dateFormat)(expireDate),
+            vnp_CreateDate: Number(nowVN.format('YYYYMMDDHHmmss')),
+            vnp_ExpireDate: Number(expireVN.format('YYYYMMDDHHmmss')),
         });
         return {
             order_code: order.order_code,
@@ -169,14 +177,14 @@ const repayOrderPaymentService = async (userId, identifier, clientIp) => {
     if (order.payment_status === constant_js_1.PaymentStatus.PAID) {
         throw new Error('Đơn hàng này đã được thanh toán thành công, không cần thanh toán lại.');
     }
-    // Khi thanh toán lại, cấp một phiên thanh toán VNPay mới trọn vẹn 15 phút
-    const now = new Date();
-    const expireTime = new Date(now.getTime() + constant_js_1.ORDER_PAYMENT_TIMEOUT_MINUTES * 60 * 1000);
+    // Khi thanh toán lại, cấp một phiên thanh toán VNPay mới trọn vẹn 15 phút theo giờ Việt Nam (UTC+7)
+    const nowVN = (0, dayjs_1.default)().tz('Asia/Ho_Chi_Minh');
+    const expireVN = nowVN.add(constant_js_1.ORDER_PAYMENT_TIMEOUT_MINUTES, 'minute');
     // Cập nhật lại thời gian đơn hàng và trạng thái UNPAID để đồng bộ với phiên VNPay mới
     await client_js_1.prisma.order.update({
         where: { id: order.id },
         data: {
-            created_at: now,
+            created_at: new Date(),
             payment_status: constant_js_1.PaymentStatus.UNPAID,
         },
     });
@@ -191,8 +199,8 @@ const repayOrderPaymentService = async (userId, identifier, clientIp) => {
         vnp_OrderType: vnpay_1.ProductCode.Pharmacy_MedicalServices,
         vnp_ReturnUrl: process.env.VNP_RETURN_URL || 'http://localhost:8080/payment/vnpay-return',
         vnp_Locale: vnpay_1.VnpLocale.VN,
-        vnp_CreateDate: (0, vnpay_1.dateFormat)(now),
-        vnp_ExpireDate: (0, vnpay_1.dateFormat)(expireTime),
+        vnp_CreateDate: Number(nowVN.format('YYYYMMDDHHmmss')),
+        vnp_ExpireDate: Number(expireVN.format('YYYYMMDDHHmmss')),
     });
     return {
         order_code: order.order_code,

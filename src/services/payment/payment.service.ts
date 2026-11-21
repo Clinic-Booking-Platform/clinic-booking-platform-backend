@@ -1,5 +1,7 @@
-import { ProductCode, VnpLocale, dateFormat } from 'vnpay';
+import { ProductCode, VnpLocale } from 'vnpay';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
 import { prisma } from '../../config/client.js';
 import { vnpay } from '../../config/vnpay.js';
 import { PaymentMethod, PaymentStatus, ORDER_PAYMENT_TIMEOUT_MINUTES } from '../../config/constant.js';
@@ -8,6 +10,9 @@ import {
     CreatePaymentUrlResult,
     VerifyReturnResult,
 } from '../../types/payment/Payment.js';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * Thanh toán toàn bộ Giỏ hàng: Khởi tạo Order & URL thanh toán VNPay
@@ -52,9 +57,9 @@ export const checkoutCartPaymentService = async (
             },
         });
 
-        // 4. Sinh URL thanh toán VNPay (kèm thời hạn 15 phút đếm ngược trên VNPay)
-        const now = new Date();
-        const expireDate = new Date(now.getTime() + ORDER_PAYMENT_TIMEOUT_MINUTES * 60 * 1000);
+        // 4. Sinh URL thanh toán VNPay theo giờ Việt Nam (UTC+7, kèm thời hạn 15 phút đếm ngược trên VNPay)
+        const nowVN = dayjs().tz('Asia/Ho_Chi_Minh');
+        const expireVN = nowVN.add(ORDER_PAYMENT_TIMEOUT_MINUTES, 'minute');
 
         const paymentUrl = vnpay.buildPaymentUrl({
             vnp_Amount: totalAmount,
@@ -64,8 +69,8 @@ export const checkoutCartPaymentService = async (
             vnp_OrderType: ProductCode.Pharmacy_MedicalServices,
             vnp_ReturnUrl: process.env.VNP_RETURN_URL || 'http://localhost:8080/payment/vnpay-return',
             vnp_Locale: VnpLocale.VN,
-            vnp_CreateDate: dateFormat(now),
-            vnp_ExpireDate: dateFormat(expireDate),
+            vnp_CreateDate: Number(nowVN.format('YYYYMMDDHHmmss')),
+            vnp_ExpireDate: Number(expireVN.format('YYYYMMDDHHmmss')),
         });
 
         return {
@@ -202,15 +207,15 @@ export const repayOrderPaymentService = async (
         throw new Error('Đơn hàng này đã được thanh toán thành công, không cần thanh toán lại.');
     }
 
-    // Khi thanh toán lại, cấp một phiên thanh toán VNPay mới trọn vẹn 15 phút
-    const now = new Date();
-    const expireTime = new Date(now.getTime() + ORDER_PAYMENT_TIMEOUT_MINUTES * 60 * 1000);
+    // Khi thanh toán lại, cấp một phiên thanh toán VNPay mới trọn vẹn 15 phút theo giờ Việt Nam (UTC+7)
+    const nowVN = dayjs().tz('Asia/Ho_Chi_Minh');
+    const expireVN = nowVN.add(ORDER_PAYMENT_TIMEOUT_MINUTES, 'minute');
 
     // Cập nhật lại thời gian đơn hàng và trạng thái UNPAID để đồng bộ với phiên VNPay mới
     await prisma.order.update({
         where: { id: order.id },
         data: {
-            created_at: now,
+            created_at: new Date(),
             payment_status: PaymentStatus.UNPAID,
         },
     });
@@ -227,8 +232,8 @@ export const repayOrderPaymentService = async (
         vnp_OrderType: ProductCode.Pharmacy_MedicalServices,
         vnp_ReturnUrl: process.env.VNP_RETURN_URL || 'http://localhost:8080/payment/vnpay-return',
         vnp_Locale: VnpLocale.VN,
-        vnp_CreateDate: dateFormat(now),
-        vnp_ExpireDate: dateFormat(expireTime),
+        vnp_CreateDate: Number(nowVN.format('YYYYMMDDHHmmss')),
+        vnp_ExpireDate: Number(expireVN.format('YYYYMMDDHHmmss')),
     });
 
     return {

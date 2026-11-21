@@ -16,7 +16,7 @@ const client_js_1 = require("../../config/client.js");
  */
 const getSchedulesAPI = async (req, res) => {
     try {
-        const { page, doctor_id, date, from_date, to_date, status } = req.query;
+        const { page, doctor_id, date, from_date, to_date, status, pageSize, limit } = req.query;
         const role = req.user?.role;
         // Bệnh nhân / Khách hàng: bắt buộc phải chọn bác sĩ để xem lịch trống
         if (role !== constant_js_1.RoleType.ADMIN && role !== constant_js_1.RoleType.DOCTOR) {
@@ -57,6 +57,7 @@ const getSchedulesAPI = async (req, res) => {
         }
         const data = await (0, schedule_service_js_1.getSchedulesService)({
             page: page ? Number(page) : 1,
+            pageSize: pageSize ? Number(pageSize) : (limit ? Number(limit) : undefined),
             doctor_id: filterDoctorId,
             date: date ? String(date) : undefined,
             from_date: fromDate,
